@@ -7,25 +7,42 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class Day02 {
 
     private final List<PasswordEntry> passwords;
 
-    public long solve() {
+    public long solve1() {
         return passwords.stream()
-                .filter(this::isValid)
+                .filter(this::isValid1)
                 .count();
     }
 
-    private boolean isValid(PasswordEntry entry) {
+    private boolean isValid1(PasswordEntry entry) {
         String password = entry.getPassword();
         Policy policy = entry.getPolicy();
 
         int matches = StringUtils.countMatches(password, policy.getCombination());
 
-        return policy.getMin() <= matches && matches <= policy.getMax();
+        return policy.getFirst() <= matches && matches <= policy.getSecond();
+    }
+
+    public long solve2() {
+        return passwords.stream()
+                .filter(this::isValid2)
+                .count();
+    }
+
+    private boolean isValid2(PasswordEntry entry) {
+        String password = entry.getPassword();
+        Policy policy = entry.getPolicy();
+
+        return Stream.of(policy.getFirst(), policy.getSecond())
+                .map(i -> password.substring(i - 1))
+                .filter(str -> str.startsWith(policy.getCombination()))
+                .count() == 1L;
     }
 
     public static Day02Builder builder() {

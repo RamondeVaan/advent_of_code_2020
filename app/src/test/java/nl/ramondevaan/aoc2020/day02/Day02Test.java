@@ -1,6 +1,5 @@
 package nl.ramondevaan.aoc2020.day02;
 
-import nl.ramondevaan.aoc2020.day01.Day01;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +7,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +25,12 @@ class Day02Test {
 
     @Test
     void puzzle1() {
-        assertEquals(528L, day02.solve());
+        assertEquals(528L, day02.solve1());
+    }
+
+    @Test
+    void puzzle2() {
+        assertEquals(497L, day02.solve2());
     }
 
 }

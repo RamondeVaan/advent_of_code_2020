@@ -4,7 +4,7 @@ import lombok.Value;
 
 @Value
 public class Policy {
-    int min;
-    int max;
+    int first;
+    int second;
     String combination;
 }
