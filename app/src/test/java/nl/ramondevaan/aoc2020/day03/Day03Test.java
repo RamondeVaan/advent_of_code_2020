@@ -30,7 +30,6 @@ class Day03Test {
 
     @Test
     void puzzle2() {
-        // Not 81536400
         assertEquals(3424528800L, day03.solve2());
     }
 }
