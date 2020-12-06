@@ -1,9 +1,12 @@
 package nl.ramondevaan.aoc2020.day05;
 
-public class SeatParser {
+import nl.ramondevaan.aoc2020.util.Parser;
 
-    Seat parse(String s) {
-        String numberString = s.replace('F', '0')
+public class SeatParser implements Parser<String, Seat> {
+
+    @Override
+    public Seat parse(String toParse) {
+        String numberString = toParse.replace('F', '0')
                 .replace('B', '1')
                 .replace('L', '0')
                 .replace('R', '1');

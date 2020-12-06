@@ -1,15 +1,17 @@
 package nl.ramondevaan.aoc2020.day05;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.PrimitiveIterator;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 public class Day05 {
     private final List<Seat> seats;
+
+    public Day05(List<String> lines) {
+        SeatParser parser = new SeatParser();
+        seats = lines.stream().map(parser::parse).collect(Collectors.toList());
+    }
 
     public long solve1() {
         return seats.stream()
@@ -30,35 +32,5 @@ public class Day05 {
         }
 
         throw new IllegalStateException();
-    }
-
-    public static Day05Builder builder() {
-        return new Day05Builder();
-    }
-
-    public static class Day05Builder {
-        private final SeatParser seatParser;
-        private List<String> lines;
-
-        Day05Builder() {
-            seatParser = new SeatParser();
-        }
-
-        public Day05Builder lines(List<String> lines) {
-            this.lines = lines;
-            return this;
-        }
-
-        private List<Seat> parseSeats() {
-            return lines.stream().map(seatParser::parse).collect(Collectors.toList());
-        }
-
-        public Day05 build() {
-            return new Day05(parseSeats());
-        }
-
-        public String toString() {
-            return "Day05.Day05Builder(seats=" + this.lines + ")";
-        }
     }
 }

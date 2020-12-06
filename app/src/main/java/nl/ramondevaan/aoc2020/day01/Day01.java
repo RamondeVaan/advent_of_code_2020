@@ -1,7 +1,5 @@
 package nl.ramondevaan.aoc2020.day01;
 
-import lombok.Builder;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
@@ -12,13 +10,25 @@ import java.util.stream.StreamSupport;
 
 import static org.apache.commons.math3.util.CombinatoricsUtils.combinationsIterator;
 
-@Builder
 public class Day01 {
 
     private final int sum;
     private final List<Long> values;
 
-    public long solve(int tupleSize) {
+    public Day01(List<String> lines) {
+        this.sum = 2020;
+        this.values = lines.stream().map(Long::parseLong).collect(Collectors.toList());
+    }
+
+    public long solve1() {
+        return solve(2);
+    }
+
+    public long solve2() {
+        return solve(3);
+    }
+
+    private long solve(int tupleSize) {
         return tuples(tupleSize)
                 .filter(values -> values.stream().reduce(0L, Long::sum) == sum)
                 .findFirst()

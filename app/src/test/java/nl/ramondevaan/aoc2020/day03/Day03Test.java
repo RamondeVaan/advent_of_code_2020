@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,10 +17,9 @@ class Day03Test {
 
     @BeforeEach
     void setUp() throws URISyntaxException, IOException {
-        day03 = Day03.builder()
-                .trees(Files.lines(Path.of(getClass().getResource("/input/day_03.txt").toURI()))
-                        .collect(Collectors.toList()))
-                .build();
+        Path path = Path.of(getClass().getResource("/input/day_03.txt").toURI());
+        List<String> lines = Files.readAllLines(path);
+        day03 = new Day03(lines);
     }
 
     @Test

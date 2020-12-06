@@ -3,12 +3,14 @@ package nl.ramondevaan.aoc2020.day04;
 import lombok.Builder;
 import lombok.Value;
 
+import java.time.Year;
+
 @Value
 @Builder
 public class Passport {
-    String birthYear;
-    String issueYear;
-    String expirationYear;
+    Year birthYear;
+    Year issueYear;
+    Year expirationYear;
     String height;
     String hairColor;
     String eyeColor;
