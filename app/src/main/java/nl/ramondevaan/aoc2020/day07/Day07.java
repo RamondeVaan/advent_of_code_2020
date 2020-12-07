@@ -5,24 +5,24 @@ import java.util.stream.Collectors;
 
 public class Day07 {
 
-    private final Map<String, Bag> bagMap;
+    private final Bags bags;
 
     public Day07(List<String> lines) {
         BagParser parser = new BagParser();
-        bagMap = parser.parse(lines);
+        bags = parser.parse(lines);
     }
 
     public long solve1() {
-        Bag shinyGoldBag = bagMap.get("shiny gold");
+        Bag shinyGoldBag = bags.bagByColor("shiny gold");
 
-        Set<Bag> parents = new HashSet<>(shinyGoldBag.getParents());
-        Set<Bag> toCheck = new HashSet<>(shinyGoldBag.getParents());
+        Set<Bag> parents = new HashSet<>(bags.parents(shinyGoldBag));
+        Set<Bag> toCheck = new HashSet<>(bags.parents(shinyGoldBag));
         Set<Bag> nextToCheck = new HashSet<>();
 
         while (!toCheck.isEmpty()) {
 
             for (Bag bag : toCheck) {
-                for (Bag parent : bag.getParents()) {
+                for (Bag parent : bags.parents(bag)) {
                     if (parents.add(parent)) {
                         nextToCheck.add(parent);
                     }
@@ -38,26 +38,26 @@ public class Day07 {
     }
 
     public long solve2() {
-        Bag shinyGoldBag = bagMap.get("shiny gold");
+        Bag shinyGoldBag = bags.bagByColor("shiny gold");
         Map<Bag, Long> bagsContainedMap = new HashMap<>();
 
-        Set<Bag> bagsToCheck = bagMap.values().stream()
-                .filter(bag -> bag.getBags().isEmpty())
+        Set<Bag> bagsToCheck = bags.bags().stream()
+                .filter(bag -> bags.children(bag).isEmpty())
                 .collect(Collectors.toSet());
 
         while (!bagsToCheck.isEmpty()) {
-            for(Bag bag : bagsToCheck) {
+            for (Bag bag : bagsToCheck) {
                 long bagsContained = bagsContained(bagsContainedMap, bag);
                 bagsContainedMap.put(bag, bagsContained);
             }
 
             bagsToCheck = bagsToCheck.stream()
-                    .flatMap(bag -> bag.getParents().stream())
+                    .flatMap(bag -> bags.parents(bag).stream())
                     .distinct()
-                    .filter(bag -> bagsContainedMap.keySet().containsAll(bag.getBags().keySet()))
+                    .filter(bag -> bagsContainedMap.keySet().containsAll(bags.children(bag).keySet()))
                     .collect(Collectors.toSet());
 
-            if(bagsToCheck.contains(shinyGoldBag)) {
+            if (bagsToCheck.contains(shinyGoldBag)) {
                 break;
             }
         }
@@ -65,8 +65,8 @@ public class Day07 {
         return bagsContained(bagsContainedMap, shinyGoldBag);
     }
 
-    private static long bagsContained(Map<Bag, Long> bagsContainedMap, Bag bag) {
-        return bag.getBags().entrySet().stream()
+    private long bagsContained(Map<Bag, Long> bagsContainedMap, Bag bag) {
+        return bags.children(bag).entrySet().stream()
                 .mapToLong(entry -> (bagsContainedMap.get(entry.getKey()) + 1) * entry.getValue())
                 .sum();
     }
