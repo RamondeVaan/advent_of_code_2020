@@ -17,7 +17,7 @@ class Day09Test {
 
     @BeforeEach
     void setUp() throws URISyntaxException, IOException {
-        Path path = Path.of(getClass().getResource("/input/day_08.txt").toURI());
+        Path path = Path.of(getClass().getResource("/input/day_09.txt").toURI());
         List<String> lines = Files.readAllLines(path);
         day09 = new Day09(lines);
     }
