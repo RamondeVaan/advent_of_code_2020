@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class StateMachine {
-    private final Map<String, OperationHandler> operationHandlerMap;
+    private final Map<OperationType, OperationHandler> operationHandlerMap;
     private final List<Operation> operations;
     private final Set<Integer> executedLines;
     private State currentState;
 
-    public StateMachine(Map<String, OperationHandler> operationHandlerMap, List<Operation> operations) {
+    public StateMachine(Map<OperationType, OperationHandler> operationHandlerMap, List<Operation> operations) {
         this.operationHandlerMap = Map.copyOf(operationHandlerMap);
         this.operations = List.copyOf(operations);
         this.executedLines = new HashSet<>();

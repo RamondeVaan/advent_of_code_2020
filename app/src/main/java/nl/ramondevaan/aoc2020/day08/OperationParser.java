@@ -9,7 +9,9 @@ public class OperationParser implements Parser<String, Operation> {
     public Operation parse(String toParse) {
         String[] split = toParse.split("\\s+");
 
-        String type = split[0];
+        String typeString = split[0];
+        OperationType type = OperationType.valueOf(typeString.toUpperCase());
+
         String argumentString = CharMatcher.is('+').removeFrom(split[1]);
         int argument = Integer.parseInt(argumentString);
 

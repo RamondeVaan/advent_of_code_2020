@@ -4,6 +4,6 @@ import lombok.Value;
 
 @Value
 public class Operation {
-    String type;
+    OperationType type;
     int argument;
 }

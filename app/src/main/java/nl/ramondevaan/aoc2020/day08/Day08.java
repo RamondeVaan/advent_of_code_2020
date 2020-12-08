@@ -2,20 +2,22 @@ package nl.ramondevaan.aoc2020.day08;
 
 import nl.ramondevaan.aoc2020.util.Parser;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Day08 {
 
-    private final Map<String, OperationHandler> operationHandlerMap;
+    private final Map<OperationType, OperationHandler> operationHandlerMap;
     private final List<Operation> operations;
 
     public Day08(List<String> lines) {
         operationHandlerMap = Map.of(
-                "nop", new NoOperationHandler(),
-                "acc", new AccumulateOperationHandler(),
-                "jmp", new JumpOperationHandler()
+                OperationType.NOP, new NoOperationHandler(),
+                OperationType.ACC, new AccumulateOperationHandler(),
+                OperationType.JMP, new JumpOperationHandler()
         );
 
         Parser<String, Operation> parser = new OperationParser();
@@ -30,20 +32,23 @@ public class Day08 {
 
     public long solve2() {
         Set<Integer> switchableTypes = IntStream.range(0, operations.size())
-                .filter(index -> operations.get(index).getType().matches("jmp|nop"))
+                .filter(index -> {
+                    OperationType type = operations.get(index).getType();
+                    return type.equals(OperationType.JMP) || type.equals(OperationType.NOP);
+                })
                 .boxed()
                 .collect(Collectors.toSet());
 
-        for(int index : switchableTypes) {
+        for (int index : switchableTypes) {
             Operation operation = operations.get(index);
             Operation replacement = new Operation(
-                    operation.getType().equals("jmp") ? "nop" : "jmp",
+                    operation.getType().equals(OperationType.JMP) ? OperationType.NOP : OperationType.JMP,
                     operation.getArgument());
 
             operations.set(index, replacement);
             StateMachine stateMachine = new StateMachine(operationHandlerMap, operations);
             StateMachineResult result = stateMachine.run();
-            if(result.getType().equals(StateMachineResultType.SUCCES)) {
+            if (result.getType().equals(StateMachineResultType.SUCCES)) {
                 return result.getFinalState().getAccumulator();
             }
             operations.set(index, operation);
