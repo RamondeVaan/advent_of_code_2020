@@ -43,7 +43,7 @@ public class Day07 {
 
         Set<Bag> bagsToCheck = bags.bags().stream()
                 .filter(bag -> bags.children(bag).isEmpty())
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableSet());
 
         while (!bagsToCheck.isEmpty()) {
             for (Bag bag : bagsToCheck) {
@@ -55,7 +55,7 @@ public class Day07 {
                     .flatMap(bag -> bags.parents(bag).stream())
                     .distinct()
                     .filter(bag -> bagsContainedMap.keySet().containsAll(bags.children(bag).keySet()))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toUnmodifiableSet());
 
             if (bagsToCheck.contains(shinyGoldBag)) {
                 break;

@@ -14,7 +14,7 @@ public class Day09 {
 
     public Day09(List<String> lines) {
         preambleSize = 25;
-        this.numbers = lines.stream().map(Long::parseLong).collect(Collectors.toList());
+        this.numbers = lines.stream().map(Long::parseLong).collect(Collectors.toUnmodifiableList());
     }
 
     public long solve1() {

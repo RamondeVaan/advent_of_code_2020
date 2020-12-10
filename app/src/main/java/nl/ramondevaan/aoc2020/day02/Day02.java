@@ -11,7 +11,7 @@ public class Day02 {
 
     public Day02(List<String> lines) {
         PasswordEntryParser parser = new PasswordEntryParser();
-        passwords = lines.stream().map(parser::parse).collect(Collectors.toList());
+        passwords = lines.stream().map(parser::parse).collect(Collectors.toUnmodifiableList());
 
         matchCountPasswordEntryValidator = new MatchCountPasswordEntryValidator();
         oneOfPasswordEntryValidator = new OneOfPasswordEntryValidator();

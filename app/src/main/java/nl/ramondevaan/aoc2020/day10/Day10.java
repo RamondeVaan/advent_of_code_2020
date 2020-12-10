@@ -1,9 +1,6 @@
 package nl.ramondevaan.aoc2020.day10;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -14,11 +11,14 @@ public class Day10 {
     private final List<Integer> joltages;
 
     public Day10(List<String> lines) {
-        int[] joltageArray = lines.stream().mapToInt(Integer::parseInt).sorted().toArray();
-        IntStream zeroPrependedJoltageStream = IntStream.concat(IntStream.of(0), Arrays.stream(joltageArray));
-        IntStream zeroPrependedMaxPlus3AppendedStream = IntStream.concat(zeroPrependedJoltageStream,
-                IntStream.of(joltageArray[joltageArray.length - 1] + RANGE));
-        this.joltages = zeroPrependedMaxPlus3AppendedStream.boxed().collect(Collectors.toList());
+        List<Integer> joltagesTemp = lines.stream().map(Integer::parseInt)
+                .collect(Collectors.toCollection(ArrayList::new));
+        int max = joltagesTemp.stream().max(Comparator.naturalOrder()).orElseThrow();
+        joltagesTemp.add(0);
+        joltagesTemp.add(max + RANGE);
+        joltagesTemp.sort(Comparator.naturalOrder());
+
+        this.joltages = List.copyOf(joltagesTemp);
     }
 
     public long solve1() {

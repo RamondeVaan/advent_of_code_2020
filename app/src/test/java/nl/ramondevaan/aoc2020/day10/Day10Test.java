@@ -29,6 +29,6 @@ public class Day10Test {
 
     @Test
     void puzzle2() {
-        assertEquals(2986195L, day10.solve2());
+        assertEquals(3100448333024L, day10.solve2());
     }
 }

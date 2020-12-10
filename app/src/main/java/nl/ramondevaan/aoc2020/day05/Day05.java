@@ -10,7 +10,7 @@ public class Day05 {
 
     public Day05(List<String> lines) {
         SeatParser parser = new SeatParser();
-        seats = lines.stream().map(parser::parse).collect(Collectors.toList());
+        seats = lines.stream().map(parser::parse).collect(Collectors.toUnmodifiableList());
     }
 
     public long solve1() {

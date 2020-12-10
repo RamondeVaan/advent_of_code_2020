@@ -17,7 +17,7 @@ public class Day04 {
 
         List<List<String>> partitionedLines = partitioner.partition(lines);
 
-        passports = partitionedLines.stream().map(parser::parse).collect(Collectors.toList());
+        passports = partitionedLines.stream().map(parser::parse).collect(Collectors.toUnmodifiableList());
         passportNotNullValidator = new PassportNotNullValidator();
         passportValidator = new PassportValidator();
     }

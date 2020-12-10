@@ -17,7 +17,7 @@ public class Day01 {
 
     public Day01(List<String> lines) {
         this.sum = 2020;
-        this.values = lines.stream().map(Long::parseLong).collect(Collectors.toList());
+        this.values = lines.stream().map(Long::parseLong).collect(Collectors.toUnmodifiableList());
     }
 
     public long solve1() {
@@ -40,6 +40,6 @@ public class Day01 {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(combinationsIterator(values.size(), tupleSize),
                 Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE | Spliterator.DISTINCT),
                 false)
-                .map(arr -> Arrays.stream(arr).mapToObj(values::get).collect(Collectors.toList()));
+                .map(arr -> Arrays.stream(arr).mapToObj(values::get).collect(Collectors.toUnmodifiableList()));
     }
 }

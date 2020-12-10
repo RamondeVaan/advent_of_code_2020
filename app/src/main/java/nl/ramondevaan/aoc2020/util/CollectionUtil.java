@@ -7,14 +7,14 @@ import java.util.stream.Collectors;
 
 public class CollectionUtil {
     public static <T> Map<T, Map<T, Long>> deepMapUnmodifiableCopy(Map<T, Map<T, Long>> map) {
-        return Map.copyOf(map.keySet().stream().collect(Collectors.toMap(
+        return map.keySet().stream().collect(Collectors.toUnmodifiableMap(
                 Function.identity(),
-                entry -> Map.copyOf(map.get(entry)))));
+                entry -> Map.copyOf(map.get(entry))));
     }
 
     public static <T> Map<T, Set<T>> deepSetUnmodifiableCopy(Map<T, Set<T>> map) {
-        return Map.copyOf(map.keySet().stream().collect(Collectors.toMap(
+        return map.keySet().stream().collect(Collectors.toUnmodifiableMap(
                 Function.identity(),
-                entry -> Set.copyOf(map.get(entry)))));
+                entry -> Set.copyOf(map.get(entry))));
     }
 }

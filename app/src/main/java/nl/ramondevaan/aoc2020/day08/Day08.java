@@ -2,6 +2,7 @@ package nl.ramondevaan.aoc2020.day08;
 
 import nl.ramondevaan.aoc2020.util.Parser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +22,7 @@ public class Day08 {
         );
 
         Parser<String, Operation> parser = new OperationParser();
-        operations = lines.stream().map(parser::parse).collect(Collectors.toList());
+        operations = lines.stream().map(parser::parse).collect(Collectors.toUnmodifiableList());
     }
 
     public long solve1() {
@@ -37,21 +38,23 @@ public class Day08 {
                     return type.equals(OperationType.JMP) || type.equals(OperationType.NOP);
                 })
                 .boxed()
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableSet());
+
+        List<Operation> modifiableOperations = new ArrayList<>(operations);
 
         for (int index : switchableTypes) {
-            Operation operation = operations.get(index);
+            Operation operation = modifiableOperations.get(index);
             Operation replacement = new Operation(
                     operation.getType().equals(OperationType.JMP) ? OperationType.NOP : OperationType.JMP,
                     operation.getArgument());
 
-            operations.set(index, replacement);
-            StateMachine stateMachine = new StateMachine(operationHandlerMap, operations);
+            modifiableOperations.set(index, replacement);
+            StateMachine stateMachine = new StateMachine(operationHandlerMap, modifiableOperations);
             StateMachineResult result = stateMachine.run();
             if (result.getType().equals(StateMachineResultType.SUCCES)) {
                 return result.getFinalState().getAccumulator();
             }
-            operations.set(index, operation);
+            modifiableOperations.set(index, operation);
         }
 
         throw new IllegalStateException();
