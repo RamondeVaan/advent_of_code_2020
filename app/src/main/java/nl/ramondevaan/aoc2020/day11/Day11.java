@@ -3,7 +3,10 @@ package nl.ramondevaan.aoc2020.day11;
 import nl.ramondevaan.aoc2020.util.Parser;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Day11 {
 
@@ -15,18 +18,18 @@ public class Day11 {
     }
 
     public long solve1() {
-        return solve(new AdjacentOccupiedSeatCounter(), 4L);
+        return solve(getNextPositionStateMapperMap(new AdjacentOccupiedSeatCounter(), 4L));
     }
 
     public long solve2() {
-        return solve(new DirectionalOccupiedSeatCounter(), 5L);
+        return solve(getNextPositionStateMapperMap(new DirectionalOccupiedSeatCounter(), 5L));
     }
 
-    private long solve(SeatCounter seatCounter, long maxOccupiedSeats) {
+    private long solve(Map<PositionState, PositionStateMapper> nextPositionStateMapperMap) {
         Seats oldSeats = initialSeats;
         Seats newSeats;
 
-        while (!Objects.equals(newSeats = nextSeats(oldSeats, seatCounter, maxOccupiedSeats), oldSeats)) {
+        while (!Objects.equals(newSeats = nextSeats(oldSeats, nextPositionStateMapperMap), oldSeats)) {
             oldSeats = newSeats;
         }
 
@@ -35,51 +38,23 @@ public class Day11 {
                 .count();
     }
 
-    private Seats nextSeats(Seats seats, SeatCounter seatCounter, long maxOccupiedSeats) {
-        PositionState[][] positions = new PositionState[seats.getHeight()][seats.getWidth()];
-
-        for (int y = 0; y < seats.getHeight(); y++) {
-            for (int x = 0; x < seats.getWidth(); x++) {
-                PositionState positionState = seats.getPositionState(x, y);
-                if (positionState.equals(PositionState.FLOOR)) {
-                    positions[y][x] = PositionState.FLOOR;
-                } else if (positionState.equals(PositionState.EMPTY)) {
-                    long occupiedSeats = seatCounter.count(seats, x, y);
-                    if (occupiedSeats == 0L) {
-                        positions[y][x] = PositionState.OCCUPIED;
-                    } else {
-                        positions[y][x] = PositionState.EMPTY;
-                    }
-                } else {
-                    long occupiedSeats = seatCounter.count(seats, x, y);
-                    if (occupiedSeats >= maxOccupiedSeats) {
-                        positions[y][x] = PositionState.EMPTY;
-                    } else {
-                        positions[y][x] = PositionState.OCCUPIED;
-                    }
-                }
-            }
-        }
-
-        return new Seats(positions);
+    private Map<PositionState, PositionStateMapper> getNextPositionStateMapperMap(SeatCounter seatCounter,
+                                                                                  long maxOccupiedSeats) {
+        return Map.of(
+                PositionState.FLOOR, (seats, coordinate) -> PositionState.FLOOR,
+                PositionState.EMPTY, (seats, coordinate) -> seatCounter.count(seats, coordinate) == 0L
+                        ? PositionState.OCCUPIED : PositionState.EMPTY,
+                PositionState.OCCUPIED, (seats, coordinate) -> seatCounter.count(seats, coordinate) >= maxOccupiedSeats
+                        ? PositionState.EMPTY : PositionState.OCCUPIED
+        );
     }
 
-    private void printSeats(Seats seats) {
-        for (int y = 0; y < seats.getHeight(); y++) {
-            for (int x = 0; x < seats.getWidth(); x++) {
-                switch (seats.getPositionState(x, y)) {
-                    case OCCUPIED:
-                        System.out.print('#');
-                        break;
-                    case EMPTY:
-                        System.out.print('L');
-                        break;
-                    case FLOOR:
-                        System.out.print('.');
-                        break;
-                }
-            }
-            System.out.println();
-        }
+    private Seats nextSeats(Seats seats, Map<PositionState, PositionStateMapper> nextPositionStateMapperMap) {
+        Map<Coordinate, PositionState> map = seats.coordinates().stream().collect(
+                Collectors.toMap(Function.identity(),
+                        coordinate -> nextPositionStateMapperMap.get(seats.getPositionState(coordinate))
+                                .map(seats, coordinate)));
+
+        return new Seats(map);
     }
 }

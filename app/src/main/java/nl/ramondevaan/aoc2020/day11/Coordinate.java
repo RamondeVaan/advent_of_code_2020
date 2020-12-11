@@ -1,13 +1,11 @@
 package nl.ramondevaan.aoc2020.day11;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
-@Getter
-@RequiredArgsConstructor
+@Value
 public class Coordinate {
-    public final int x;
-    public final int y;
+    public int x;
+    public int y;
 
     public Coordinate add(int x, int y) {
         return new Coordinate(this.x + x, this.y + y);

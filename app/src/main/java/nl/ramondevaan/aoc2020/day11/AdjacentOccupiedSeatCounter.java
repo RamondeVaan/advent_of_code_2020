@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 public class AdjacentOccupiedSeatCounter implements SeatCounter {
     @Override
-    public long count(Seats seats, int x, int y) {
+    public long count(Seats seats, Coordinate coordinate) {
         return Arrays.stream(Direction.values())
-                .map(direction -> Coordinate.of(x + direction.x, y + direction.y))
+                .map(direction -> coordinate.add(direction.x, direction.y))
                 .filter(seats::isInRange)
                 .map(seats::getPositionState)
                 .filter(position -> position.equals(PositionState.OCCUPIED))
