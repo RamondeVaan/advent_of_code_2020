@@ -1,0 +1,35 @@
+package nl.ramondevaan.aoc2020.day11;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class Day11Test {
+
+    Day11 day11;
+
+    @BeforeEach
+    void setUp() throws URISyntaxException, IOException {
+        Path path = Path.of(getClass().getResource("/input/day_11.txt").toURI());
+        List<String> lines = Files.readAllLines(path);
+        day11 = new Day11(lines);
+    }
+
+    @Test
+    void puzzle1() {
+        assertEquals(2281L, day11.solve1());
+    }
+
+    @Test
+    void puzzle2() {
+        assertEquals(2085L, day11.solve2());
+    }
+
+}
