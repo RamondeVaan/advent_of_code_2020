@@ -8,8 +8,8 @@ public class TranslationActionHandler implements ActionHandler {
     Vector2i translation;
 
     @Override
-    public BoatState handleAction(BoatState boatState, Action action) {
-        Vector2i newPosition = boatState.position.add(translation, action.value);
+    public BoatState handleAction(BoatState boatState, int value) {
+        Vector2i newPosition = boatState.position.add(translation, value);
         return new BoatState(newPosition, boatState.direction, boatState.relativeWaypoint);
     }
 }

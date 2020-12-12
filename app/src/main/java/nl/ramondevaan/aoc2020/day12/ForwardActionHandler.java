@@ -6,9 +6,9 @@ import lombok.Value;
 public class ForwardActionHandler implements ActionHandler {
 
     @Override
-    public BoatState handleAction(BoatState boatState, Action action) {
+    public BoatState handleAction(BoatState boatState, int value) {
         Vector2i translation = boatState.direction.translation;
-        Vector2i nextPosition = boatState.position.add(translation, action.value);
+        Vector2i nextPosition = boatState.position.add(translation, value);
 
         return new BoatState(nextPosition, boatState.direction, boatState.relativeWaypoint);
     }

@@ -47,7 +47,7 @@ public class Day12 {
         BoatState boatState = initialBoatState;
 
         for (Action action : actions) {
-            boatState = handlerMap.get(action.actionType).handleAction(boatState, action);
+            boatState = handlerMap.get(action.actionType).handleAction(boatState, action.value);
         }
 
         return distanceTravelled(boatState);

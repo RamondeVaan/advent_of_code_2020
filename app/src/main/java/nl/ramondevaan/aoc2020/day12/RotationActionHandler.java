@@ -24,9 +24,9 @@ public class RotationActionHandler implements ActionHandler {
     }
 
     @Override
-    public BoatState handleAction(BoatState boatState, Action action) {
+    public BoatState handleAction(BoatState boatState, int value) {
         int start = index.get(boatState.direction);
-        int offset = (action.value / 90);
+        int offset = (value / 90);
         int nextIndex = (start + offset) % directionOrder.size();
         Direction next = directionOrder.get(nextIndex);
 
