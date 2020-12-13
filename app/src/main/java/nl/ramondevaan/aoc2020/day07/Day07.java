@@ -1,5 +1,7 @@
 package nl.ramondevaan.aoc2020.day07;
 
+import nl.ramondevaan.aoc2020.util.Parser;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -8,7 +10,7 @@ public class Day07 {
     private final Bags bags;
 
     public Day07(List<String> lines) {
-        BagParser parser = new BagParser();
+        Parser<List<String>, Bags> parser = new BagsParser();
         bags = parser.parse(lines);
     }
 

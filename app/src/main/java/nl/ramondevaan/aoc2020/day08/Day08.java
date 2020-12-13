@@ -16,9 +16,9 @@ public class Day08 {
 
     public Day08(List<String> lines) {
         operationHandlerMap = Map.of(
-                OperationType.NOP, new NoOperationHandler(),
-                OperationType.ACC, new AccumulateOperationHandler(),
-                OperationType.JMP, new JumpOperationHandler()
+                OperationType.NOP, (state, argument) -> state.increaseProgramCounter(1),
+                OperationType.ACC, (state, argument) -> state.increment(1, argument),
+                OperationType.JMP, State::increaseProgramCounter
         );
 
         Parser<String, Operation> parser = new OperationParser();

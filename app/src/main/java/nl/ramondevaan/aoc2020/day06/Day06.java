@@ -1,6 +1,7 @@
 package nl.ramondevaan.aoc2020.day06;
 
 import nl.ramondevaan.aoc2020.util.BlankStringPartitioner;
+import nl.ramondevaan.aoc2020.util.Partitioner;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class Day06 {
     private final List<List<String>> answersByGroup;
 
     public Day06(List<String> lines) {
-        BlankStringPartitioner partitioner = new BlankStringPartitioner();
+        Partitioner<String> partitioner = new BlankStringPartitioner();
         this.answersByGroup = partitioner.partition(lines);
     }
 

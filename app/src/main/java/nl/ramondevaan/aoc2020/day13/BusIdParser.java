@@ -7,20 +7,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class BusesParser implements Parser<String, Buses> {
+public class BusIdParser implements Parser<String, Map<Integer, Long>> {
 
     @Override
-    public Buses parse(String toParse) {
+    public Map<Integer, Long> parse(String toParse) {
         String[] split = toParse.split(",");
-
-        int size = split.length;
-        Map<Integer, Long> indexToBusIdMap = IntStream.range(0, size)
+        return IntStream.range(0, split.length)
                 .filter(index -> !split[index].equals("x"))
                 .boxed()
                 .collect(Collectors.toUnmodifiableMap(
                         Function.identity(),
                         index -> Long.parseLong(split[index])));
-
-        return new Buses(size, indexToBusIdMap);
     }
 }

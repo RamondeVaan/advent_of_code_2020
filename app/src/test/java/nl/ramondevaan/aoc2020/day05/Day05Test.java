@@ -1,6 +1,6 @@
 package nl.ramondevaan.aoc2020.day05;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -13,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class Day05Test {
 
-    Day05 day05;
+    static Day05 day05;
 
-    @BeforeEach
-    void setUp() throws URISyntaxException, IOException {
-        Path path = Path.of(getClass().getResource("/input/day_05.txt").toURI());
+    @BeforeAll
+    static void setUp() throws URISyntaxException, IOException {
+        Path path = Path.of(Day05Test.class.getResource("/input/day_05.txt").toURI());
         List<String> lines = Files.readAllLines(path);
         day05 = new Day05(lines);
     }

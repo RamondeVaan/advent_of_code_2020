@@ -11,4 +11,12 @@ public enum Direction {
     Direction(Vector2i translation) {
         this.translation = translation;
     }
+
+    public Direction rotateRight(int times) {
+        return Direction.values()[Math.floorMod(this.ordinal() + times, 4)];
+    }
+
+    public Direction rotateLeft(int times) {
+        return Direction.values()[Math.floorMod(this.ordinal() - times, 4)];
+    }
 }

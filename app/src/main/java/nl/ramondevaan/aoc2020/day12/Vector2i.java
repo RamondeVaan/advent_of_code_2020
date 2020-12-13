@@ -15,33 +15,23 @@ public class Vector2i {
         return new Vector2i(this.x + other.x * multiplicationFactor, this.y + other.y * multiplicationFactor);
     }
 
-    public Vector2i rotateClockwise(int times) {
-        int xNew = this.x;
-        int yNew = this.y;
-        int temp;
-
-        int t = times % 4;
-
-        for (int i = 0; i < t; i++) {
-            temp = xNew;
-            xNew = yNew;
-            yNew = -temp;
-        }
-
-        return new Vector2i(xNew, yNew);
+    public Vector2i rotateRight(int times) {
+        return rotate(Math.floorMod(times, 4));
     }
 
-    public Vector2i rotateCounterClockwise(int times) {
+    public Vector2i rotateLeft(int times) {
+        return rotate(4 - Math.floorMod(times, 4));
+    }
+
+    private Vector2i rotate(int times) {
         int xNew = this.x;
         int yNew = this.y;
         int temp;
 
-        int t = times % 4;
-
-        for (int i = 0; i < t; i++) {
-            temp = xNew;
-            xNew = -yNew;
-            yNew = temp;
+        for (int i = 0; i < times; i++) {
+            temp = yNew;
+            yNew = -xNew;
+            xNew = temp;
         }
 
         return new Vector2i(xNew, yNew);

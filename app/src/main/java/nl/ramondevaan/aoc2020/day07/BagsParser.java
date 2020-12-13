@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BagParser implements Parser<List<String>, Bags> {
+public class BagsParser implements Parser<List<String>, Bags> {
     private static final String COLOR_REGEX = ".*?";
     private static final String BAG_COLOR_REGEX = "(" + COLOR_REGEX + ") bags contain";
     private static final String BAG_COLOR_AND_COUNT_REGEX = "(\\d+) (" + COLOR_REGEX + ") bag";

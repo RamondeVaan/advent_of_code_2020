@@ -1,6 +1,10 @@
 package nl.ramondevaan.aoc2020.day10;
 
-import java.util.*;
+import nl.ramondevaan.aoc2020.util.Parser;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -11,14 +15,9 @@ public class Day10 {
     private final List<Integer> joltages;
 
     public Day10(List<String> lines) {
-        List<Integer> joltagesTemp = lines.stream().map(Integer::parseInt)
-                .collect(Collectors.toCollection(ArrayList::new));
-        int max = joltagesTemp.stream().max(Comparator.naturalOrder()).orElseThrow();
-        joltagesTemp.add(0);
-        joltagesTemp.add(max + RANGE);
-        joltagesTemp.sort(Comparator.naturalOrder());
+        Parser<List<String>, List<Integer>> parser = new JoltagesParser(RANGE);
 
-        this.joltages = List.copyOf(joltagesTemp);
+        this.joltages = parser.parse(lines);
     }
 
     public long solve1() {
@@ -38,14 +37,14 @@ public class Day10 {
 
         indexToWays.put(0, 1L);
 
-        for(int index = 0; index < joltages.size(); index++) {
+        for (int index = 0; index < joltages.size(); index++) {
             int joltage = joltages.get(index);
             long ways = indexToWays.get(index);
 
-            for(int nextIndex = index + 1; nextIndex < joltages.size(); nextIndex++) {
+            for (int nextIndex = index + 1; nextIndex < joltages.size(); nextIndex++) {
                 int nextJoltage = joltages.get(nextIndex);
 
-                if((nextJoltage - joltage) > RANGE) {
+                if ((nextJoltage - joltage) > RANGE) {
                     break;
                 }
 

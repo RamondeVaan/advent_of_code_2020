@@ -1,5 +1,7 @@
 package nl.ramondevaan.aoc2020.day03;
 
+import nl.ramondevaan.aoc2020.util.Parser;
+
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -8,7 +10,7 @@ public class Day03 {
     private final TreeMap treeMap;
 
     public Day03(List<String> lines) {
-        TreeMapParser parser = new TreeMapParser();
+        Parser<List<String>, TreeMap> parser = new TreeMapParser();
         this.treeMap = parser.parse(lines);
     }
 

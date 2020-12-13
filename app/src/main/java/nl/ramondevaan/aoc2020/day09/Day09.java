@@ -9,16 +9,15 @@ import static org.apache.commons.math3.util.CombinatoricsUtils.combinationsItera
 
 public class Day09 {
 
-    private final int preambleSize;
+    private static final int PREAMBLE_SIZE = 25;
     private final List<Long> numbers;
 
     public Day09(List<String> lines) {
-        preambleSize = 25;
         this.numbers = lines.stream().map(Long::parseLong).collect(Collectors.toUnmodifiableList());
     }
 
     public long solve1() {
-        return IntStream.range(preambleSize, numbers.size())
+        return IntStream.range(PREAMBLE_SIZE, numbers.size())
                 .filter(index -> !isValid(index))
                 .mapToLong(numbers::get)
                 .findFirst().orElseThrow();
@@ -26,8 +25,8 @@ public class Day09 {
 
     private boolean isValid(int index) {
         long value = numbers.get(index);
-        List<Long> previousNumbers = numbers.subList(index - preambleSize, index);
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(combinationsIterator(preambleSize, 2),
+        List<Long> previousNumbers = numbers.subList(index - PREAMBLE_SIZE, index);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(combinationsIterator(PREAMBLE_SIZE, 2),
                 Spliterator.ORDERED | Spliterator.NONNULL | Spliterator.IMMUTABLE | Spliterator.DISTINCT),
                 false)
                 .anyMatch(tuple -> Arrays.stream(tuple).mapToLong(previousNumbers::get).sum() == value);
@@ -40,10 +39,10 @@ public class Day09 {
         int end = 1;
         LongSummaryStatistics statistics;
 
-        while((statistics = IntStream.rangeClosed(start, end)
+        while ((statistics = IntStream.rangeClosed(start, end)
                 .mapToLong(numbers::get)
                 .summaryStatistics()).getSum() != target) {
-            if(statistics.getSum() < target) {
+            if (statistics.getSum() < target) {
                 end++;
             } else {
                 start++;

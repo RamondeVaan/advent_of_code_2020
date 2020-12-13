@@ -12,11 +12,10 @@ import static org.apache.commons.math3.util.CombinatoricsUtils.combinationsItera
 
 public class Day01 {
 
-    private final int sum;
+    private static final int SUM = 2020;
     private final List<Long> values;
 
     public Day01(List<String> lines) {
-        this.sum = 2020;
         this.values = lines.stream().map(Long::parseLong).collect(Collectors.toUnmodifiableList());
     }
 
@@ -30,7 +29,7 @@ public class Day01 {
 
     private long solve(int tupleSize) {
         return tuples(tupleSize)
-                .filter(values -> values.stream().reduce(0L, Long::sum) == sum)
+                .filter(values -> values.stream().reduce(0L, Long::sum) == SUM)
                 .findFirst()
                 .map(values -> values.stream().reduce(1L, (a, b) -> a * b))
                 .orElseThrow();
