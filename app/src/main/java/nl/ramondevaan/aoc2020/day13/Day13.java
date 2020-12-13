@@ -34,13 +34,10 @@ public class Day13 {
         long step = 1;
 
         for (Map.Entry<Integer, Long> entry : indexToBusIdMap.entrySet()) {
-            for (long t = time; true; t += step) {
-                if ((t + entry.getKey()) % entry.getValue() == 0) {
-                    time = t;
-                    step *= entry.getValue();
-                    break;
-                }
+            while ((time + entry.getKey()) % entry.getValue() != 0) {
+                time += step;
             }
+            step *= entry.getValue();
         }
 
         return time;
