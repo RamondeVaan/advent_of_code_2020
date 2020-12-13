@@ -27,12 +27,10 @@ public class Day05 {
 
         int count = seatIdIterator.nextInt() + 1;
 
-        for (; seatIdIterator.hasNext(); count++) {
-            if (seatIdIterator.nextInt() != count) {
-                return count;
-            }
+        while (seatIdIterator.nextInt() == count) {
+            count++;
         }
 
-        throw new IllegalStateException();
+        return count;
     }
 }
