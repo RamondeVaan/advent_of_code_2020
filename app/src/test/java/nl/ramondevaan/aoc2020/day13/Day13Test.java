@@ -12,6 +12,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class Day13Test {
+
     static Day13 day13;
 
     @BeforeAll
