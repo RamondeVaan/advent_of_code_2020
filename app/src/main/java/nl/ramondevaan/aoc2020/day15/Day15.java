@@ -25,23 +25,25 @@ public class Day15 {
         Map<Integer, Deque<Integer>> numberToIndicesMap = new HashMap<>();
         int nextNumber = 0;
         int numberIndex = 0;
-        Deque<Integer> previousNumberIndices = null;
+        Deque<Integer> previousNumberIndices = new ArrayDeque<>();
 
         for (Integer number : numbers) {
-            previousNumberIndices = new ArrayDeque<>(2);
-            previousNumberIndices.offer(numberIndex++);
-            numberToIndicesMap.put(number, previousNumberIndices);
+            previousNumberIndices = add(numberToIndicesMap, number, numberIndex++);
         }
 
         for (; numberIndex < lastNumberIndex; numberIndex++) {
-            nextNumber = previousNumberIndices == null || previousNumberIndices.size() == 1 ? 0 :
+            nextNumber = previousNumberIndices.size() == 1 ? 0 :
                     previousNumberIndices.getLast() - previousNumberIndices.removeFirst();
-
-            previousNumberIndices = numberToIndicesMap.getOrDefault(nextNumber, new ArrayDeque<>(2));
-            previousNumberIndices.offer(numberIndex);
-            numberToIndicesMap.put(nextNumber, previousNumberIndices);
+            previousNumberIndices = add(numberToIndicesMap, nextNumber, numberIndex);
         }
 
         return nextNumber;
+    }
+
+    private static Deque<Integer> add(Map<Integer, Deque<Integer>> numberToIndicesMap, int value, int index) {
+        Deque<Integer> lastIndices = numberToIndicesMap.getOrDefault(value, new ArrayDeque<>(2));
+        lastIndices.offer(index);
+        numberToIndicesMap.put(value, lastIndices);
+        return lastIndices;
     }
 }
