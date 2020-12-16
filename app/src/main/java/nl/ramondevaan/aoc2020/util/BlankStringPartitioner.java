@@ -3,22 +3,34 @@ package nl.ramondevaan.aoc2020.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class BlankStringPartitioner implements Partitioner<String> {
     @Override
     public List<List<String>> partition(List<String> lines) {
-        int[] blankLineIndices = IntStream.range(0, lines.size()).filter(index -> lines.get(index).isBlank()).toArray();
 
-        List<List<String>> lists = new ArrayList<>();
-        int lastIndex = 0;
+        List<List<String>> ret = new ArrayList<>();
+        List<String> current = null;
+        boolean lastLineBlank = true;
 
-        for (int index : blankLineIndices) {
-            lists.add(List.copyOf(lines.subList(lastIndex, index)));
-            lastIndex = index + 1;
+        for (String line : lines) {
+            boolean isBlank = line.isBlank();
+            if (isBlank) {
+                if (!lastLineBlank) {
+                    ret.add(Collections.unmodifiableList(current));
+                }
+            } else {
+                if (lastLineBlank) {
+                    current = new ArrayList<>();
+                }
+                current.add(line);
+            }
+            lastLineBlank = isBlank;
         }
 
-        lists.add(lines.subList(lastIndex, lines.size()));
-        return Collections.unmodifiableList(lists);
+        if (!lastLineBlank) {
+            ret.add(Collections.unmodifiableList(current));
+        }
+
+        return Collections.unmodifiableList(ret);
     }
 }
