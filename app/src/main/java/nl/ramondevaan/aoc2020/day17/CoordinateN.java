@@ -1,14 +1,14 @@
 package nl.ramondevaan.aoc2020.day17;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-@ToString(includeFieldNames = false)
+@EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CoordinateN {
     private final int[] coordinatePerDimension;
@@ -31,11 +31,11 @@ public class CoordinateN {
         Stream<CoordinateN> before = Stream.empty();
         Stream<CoordinateN> after = Stream.empty();
 
-        for (int dimensionIndex = dimension - 1; dimensionIndex >= 0; dimensionIndex--) {
+        for (int dimensionIndex = 0; dimensionIndex < dimension; dimensionIndex++) {
             Range[] rangesBefore = new Range[dimension];
             Range[] rangesAfter = new Range[dimension];
 
-            for (int index = 0; index < dimensionIndex; index++) {
+            for (int index = dimension - 1; index > dimensionIndex; index--) {
                 int coordinate = coordinatePerDimension[index];
                 Range range = RangeImpl.of(coordinate - distance, coordinate + distance);
                 rangesBefore[index] = range;
@@ -46,7 +46,7 @@ public class CoordinateN {
             rangesBefore[dimensionIndex] = RangeImpl.of(dimensionCoordinate - distance, dimensionCoordinate - 1);
             rangesAfter[dimensionIndex] = RangeImpl.of(dimensionCoordinate + 1, dimensionCoordinate + distance);
 
-            for (int index = dimensionIndex + 1; index < dimension; index++) {
+            for (int index = dimensionIndex - 1; index >= 0; index--) {
                 int coordinate = coordinatePerDimension[index];
                 Range range = RangeImpl.of(coordinate, coordinate);
                 rangesBefore[index] = range;
@@ -58,19 +58,6 @@ public class CoordinateN {
         }
 
         return Stream.concat(before, after);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CoordinateN that = (CoordinateN) o;
-        return Arrays.equals(coordinatePerDimension, that.coordinatePerDimension);
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(coordinatePerDimension);
     }
 
     public static Stream<CoordinateN> range(Range... ranges) {
