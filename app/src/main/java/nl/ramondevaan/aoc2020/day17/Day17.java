@@ -7,6 +7,7 @@ import java.util.Set;
 
 public class Day17 {
 
+    private static final int REPETITIONS = 6;
     private final Set<CoordinateN> initialActiveCubes;
 
     public Day17(List<String> lines) {
@@ -25,7 +26,7 @@ public class Day17 {
     public long solve(int dimension) {
         Cubes cubes = getCubes(dimension);
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < REPETITIONS; i++) {
             cubes = nextCubes(cubes);
         }
 
