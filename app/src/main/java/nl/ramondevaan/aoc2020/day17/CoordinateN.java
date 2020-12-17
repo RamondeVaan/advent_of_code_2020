@@ -28,16 +28,12 @@ public class CoordinateN {
 
     public Stream<CoordinateN> neighbors(int distance) {
         final int absDistance = Math.abs(distance);
-        Range[] ranges = Arrays.stream(coordinatePerDimension)
+        List<Range> ranges = Arrays.stream(coordinatePerDimension)
                 .mapToObj(value -> RangeImpl.of(value - absDistance, value + absDistance))
-                .toArray(Range[]::new);
+                .collect(Collectors.toList());
         Set<CoordinateN> set = range(ranges).collect(Collectors.toSet());
         set.remove(this);
         return set.stream();
-    }
-
-    public static Stream<CoordinateN> range(Range... ranges) {
-        return range(Arrays.asList(ranges));
     }
 
     public static Stream<CoordinateN> range(List<Range> ranges) {
