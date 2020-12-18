@@ -24,7 +24,7 @@ class Day18Test {
 
     @Test
     void puzzle1() {
-        assertEquals(375L, day18.solve1());
+        assertEquals(21347713555555L, day18.solve1());
     }
 
     @Test
