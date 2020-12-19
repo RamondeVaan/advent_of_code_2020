@@ -1,32 +1,27 @@
 package nl.ramondevaan.aoc2020.day18;
 
-import nl.ramondevaan.aoc2020.day18.token.Token;
-import nl.ramondevaan.aoc2020.day18.token.TokenParser;
-import nl.ramondevaan.aoc2020.util.Parser;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Day18 {
 
-    private final List<Expression> expressions;
-    private final List<List<Token>> tokenizedExpressions;
+    private final List<String> lines;
 
     public Day18(List<String> lines) {
-        Parser<String, Expression> parser = new ExpressionParser();
-        Parser<String, List<Token>> tokenParser = new TokenParser();
-
-        tokenizedExpressions = lines.stream().map(tokenParser::parse).collect(Collectors.toList());
-        expressions = lines.stream().map(parser::parse).collect(Collectors.toList());
-
+        this.lines = lines;
     }
 
     public long solve1() {
-        return expressions.stream().mapToLong(Expression::compute).sum();
+        StringFunction leftToRight = new OperatorStringFunction();
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(List.of(new RemoveParenthesesStringFunction(),
+                new ParenthesesStringFunction(List.of(leftToRight)), leftToRight));
+        return lines.stream().mapToLong(evaluator::evaluate).sum();
     }
 
     public long solve2() {
-        Solver solver = new Solver();
-        return tokenizedExpressions.stream().mapToLong(solver::solve).sum();
+        StringFunction add = new AddStringFunction();
+        StringFunction multiply = new MultiplyStringFunction();
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(List.of(new RemoveParenthesesStringFunction(),
+                new ParenthesesStringFunction(List.of(add, multiply)), add, multiply));
+        return lines.stream().mapToLong(evaluator::evaluate).sum();
     }
 }
