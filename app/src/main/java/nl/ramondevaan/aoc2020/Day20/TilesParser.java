@@ -58,17 +58,13 @@ public class TilesParser implements Parser<List<String>, Tiles> {
     private int[][] getData(Tile[][] tiles) {
         int height = tiles.length;
         int width = tiles[0].length;
-        int tileSize = tiles[0][0].getData().length;
+        int tileSize = tiles[0][0].size;
 
         int[][] data = new int[height * tileSize][width * tileSize];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                for (int line = 0; line < tileSize; line++) {
-                    System.arraycopy(tiles[y][x].getData()[line], 0,
-                            data[y * tileSize + line], x * tileSize,
-                            tileSize);
-                }
+                tiles[y][x].copyData(data, x * tileSize, y * tileSize);
             }
         }
 

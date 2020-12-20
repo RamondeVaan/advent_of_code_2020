@@ -1,20 +1,39 @@
 package nl.ramondevaan.aoc2020.Day20;
 
 import lombok.EqualsAndHashCode;
-import lombok.Value;
+import lombok.Getter;
 import nl.ramondevaan.aoc2020.util.ArrayUtil;
 
 import java.util.List;
 import java.util.Map;
 
-@Value
 @EqualsAndHashCode(of = "id")
 public class Tile {
 
-    public long id;
-    int[][] data;
-    public Map<Side, List<Integer>> edgesClockwise;
-    public Map<Side, List<Integer>> edgesCounterClockwise;
+    @Getter
+    public final long id;
+    private final int[][] data;
+    @Getter
+    public final int size;
+    @Getter
+    public final Map<Side, List<Integer>> edgesClockwise;
+    @Getter
+    public final Map<Side, List<Integer>> edgesCounterClockwise;
+
+    public Tile(long id, int[][] data, Map<Side, List<Integer>> edgesClockwise,
+                Map<Side, List<Integer>> edgesCounterClockwise) {
+        this.id = id;
+        this.data = data;
+        this.size = data.length;
+        this.edgesClockwise = edgesClockwise;
+        this.edgesCounterClockwise = edgesCounterClockwise;
+    }
+
+    public void copyData(int[][] target, int xOffset, int yOffset) {
+        for (int line = 0; line < size; line++) {
+            System.arraycopy(data[line], 0, target[yOffset + line], xOffset, size);
+        }
+    }
 
     public Tile rotateRight(int times) {
         if (times == 0) {
