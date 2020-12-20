@@ -1,4 +1,4 @@
-package nl.ramondevaan.aoc2020.day19.BRule;
+package nl.ramondevaan.aoc2020.day19;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -7,11 +7,11 @@ import nl.ramondevaan.aoc2020.util.Parser;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class RuleParser implements Parser<List<String>, BRule> {
+public class RuleParser implements Parser<List<String>, Rule> {
     @Override
-    public BRule parse(List<String> lines) {
-        Map<Integer, BRule> valueLines = new HashMap<>();
-        Map<Integer, BRuleBuilder> referenceLines = new HashMap<>();
+    public Rule parse(List<String> lines) {
+        Map<Integer, Rule> valueLines = new HashMap<>();
+        Map<Integer, RuleBuilder> referenceLines = new HashMap<>();
         Multimap<Integer, Integer> referencedBy = HashMultimap.create();
         Multimap<Integer, Integer> references = HashMultimap.create();
 
@@ -22,7 +22,7 @@ public class RuleParser implements Parser<List<String>, BRule> {
             if (value.startsWith("\"")) {
                 valueLines.put(index, new LiteralRule(value.substring(1, value.length() - 1)));
             } else {
-                BRuleBuilder rule = parseRule(index, value);
+                RuleBuilder rule = parseRule(index, value);
                 rule.references().forEach(reference -> {
                     referencedBy.put(reference, index);
                     references.put(index, reference);
@@ -44,8 +44,8 @@ public class RuleParser implements Parser<List<String>, BRule> {
                     if (references.get(referencer).size() == 0) {
                         nextValueIndices.add(referencer);
 
-                        BRuleBuilder builder = referenceLines.get(referencer);
-                        BRule rule = builder.build(valueLines);
+                        RuleBuilder builder = referenceLines.get(referencer);
+                        Rule rule = builder.build(valueLines);
                         valueLines.put(referencer, rule);
                     }
                 }
@@ -57,7 +57,7 @@ public class RuleParser implements Parser<List<String>, BRule> {
         return valueLines.get(0);
     }
 
-    private BRuleBuilder parseRule(int index, String value) {
+    private RuleBuilder parseRule(int index, String value) {
         int barIndex = value.indexOf('|');
 
         if (barIndex >= 0) {
@@ -67,7 +67,7 @@ public class RuleParser implements Parser<List<String>, BRule> {
         return parseSequenceRule(value);
     }
 
-    private BRuleBuilder parseBarRule(int index, String value, int barIndex) {
+    private RuleBuilder parseBarRule(int index, String value, int barIndex) {
         List<Integer> leftReferences = parseIntegers(value.substring(0, barIndex));
         List<Integer> rightReferences = parseIntegers(value.substring(barIndex + 1));
 

@@ -29,7 +29,7 @@ class Day19Test {
 
     @Test
     void puzzle2() {
-        assertEquals(275011754427339L, day19.solve2());
+        assertEquals(309L, day19.solve2());
     }
 
 }

@@ -1,4 +1,4 @@
-package nl.ramondevaan.aoc2020.day19.BRule;
+package nl.ramondevaan.aoc2020.day19;
 
 import lombok.Value;
 
@@ -8,15 +8,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Value
-public class SequenceRule implements BRule {
+public class SequenceRule implements Rule {
 
-    List<BRule> rules;
+    List<Rule> rules;
 
     @Override
     public IntStream take(String toValidate, int from) {
         IntStream ret = IntStream.of(from);
 
-        for (BRule rule : rules) {
+        for (Rule rule : rules) {
             ret = ret.flatMap(nextFrom -> rule.take(toValidate, nextFrom));
         }
 
@@ -24,7 +24,7 @@ public class SequenceRule implements BRule {
     }
 
     @Value
-    public static class SequenceRuleBuilder implements BRuleBuilder {
+    public static class SequenceRuleBuilder implements RuleBuilder {
 
         List<Integer> indices;
 
@@ -34,8 +34,8 @@ public class SequenceRule implements BRule {
         }
 
         @Override
-        public BRule build(Map<Integer, BRule> references) {
-            List<BRule> rules = indices.stream().map(references::get).collect(Collectors.toUnmodifiableList());
+        public Rule build(Map<Integer, Rule> references) {
+            List<Rule> rules = indices.stream().map(references::get).collect(Collectors.toUnmodifiableList());
             return new SequenceRule(rules);
         }
     }

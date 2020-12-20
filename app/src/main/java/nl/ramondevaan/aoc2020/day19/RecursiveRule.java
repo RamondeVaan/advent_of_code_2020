@@ -1,4 +1,4 @@
-package nl.ramondevaan.aoc2020.day19.BRule;
+package nl.ramondevaan.aoc2020.day19;
 
 import lombok.Value;
 
@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 @Value
-public class RecursiveRule implements BRule {
+public class RecursiveRule implements Rule {
 
-    BRule left;
-    BRule right;
+    Rule left;
+    Rule right;
 
     @Override
     public IntStream take(String toValidate, int from) {
@@ -29,7 +29,7 @@ public class RecursiveRule implements BRule {
     }
 
     @Value
-    public static class RecursiveRuleBuilder implements BRuleBuilder {
+    public static class RecursiveRuleBuilder implements RuleBuilder {
 
         List<Integer> leftOfIndexReferences;
         List<Integer> rightOfIndexReferences;
@@ -41,14 +41,14 @@ public class RecursiveRule implements BRule {
         }
 
         @Override
-        public BRule build(Map<Integer, BRule> references) {
-            BRule left = buildRule(leftOfIndexReferences, references);
-            BRule right = buildRule(rightOfIndexReferences, references);
+        public Rule build(Map<Integer, Rule> references) {
+            Rule left = buildRule(leftOfIndexReferences, references);
+            Rule right = buildRule(rightOfIndexReferences, references);
 
             return new RecursiveRule(left, right);
         }
 
-        private BRule buildRule(List<Integer> indices, Map<Integer, BRule> references) {
+        private Rule buildRule(List<Integer> indices, Map<Integer, Rule> references) {
             if (indices.isEmpty()) {
                 return (toValidate, from) -> IntStream.of(from);
             } else {

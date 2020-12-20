@@ -1,4 +1,4 @@
-package nl.ramondevaan.aoc2020.day19.BRule;
+package nl.ramondevaan.aoc2020.day19;
 
 import lombok.Value;
 
@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 @Value
-public class OptionRule implements BRule {
+public class OptionRule implements Rule {
 
-    BRule left;
-    BRule right;
+    Rule left;
+    Rule right;
 
     @Override
     public IntStream take(String toValidate, int from) {
@@ -21,7 +21,7 @@ public class OptionRule implements BRule {
     }
 
     @Value
-    public static class OptionRuleBuilder implements BRuleBuilder {
+    public static class OptionRuleBuilder implements RuleBuilder {
 
         List<Integer> leftReferences;
         List<Integer> rightReferences;
@@ -33,7 +33,7 @@ public class OptionRule implements BRule {
         }
 
         @Override
-        public BRule build(Map<Integer, BRule> references) {
+        public Rule build(Map<Integer, Rule> references) {
             SequenceRule.SequenceRuleBuilder leftBuilder = new SequenceRule.SequenceRuleBuilder(leftReferences);
             SequenceRule.SequenceRuleBuilder rightBuilder = new SequenceRule.SequenceRuleBuilder(rightReferences);
 

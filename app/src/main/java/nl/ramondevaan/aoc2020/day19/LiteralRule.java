@@ -1,11 +1,11 @@
-package nl.ramondevaan.aoc2020.day19.BRule;
+package nl.ramondevaan.aoc2020.day19;
 
 import lombok.Value;
 
 import java.util.stream.IntStream;
 
 @Value
-public class LiteralRule implements BRule {
+public class LiteralRule implements Rule {
 
     String literal;
 
