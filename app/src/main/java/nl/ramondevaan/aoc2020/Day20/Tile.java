@@ -16,26 +16,6 @@ public class Tile {
     public Map<Side, List<Integer>> edgesClockwise;
     public Map<Side, List<Integer>> edgesCounterClockwise;
 
-    public boolean matchesClockwise(List<Integer> edge) {
-        for (List<Integer> thisEdge : edgesClockwise.values()) {
-            if (thisEdge.equals(edge)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public boolean matchesCounterClockwise(List<Integer> edge) {
-        for (List<Integer> thisEdge : edgesCounterClockwise.values()) {
-            if (thisEdge.equals(edge)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public Tile rotateRight(int times) {
         if (times == 0) {
             return this;

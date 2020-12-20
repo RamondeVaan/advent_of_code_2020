@@ -96,8 +96,7 @@ public class TilesParser implements Parser<List<String>, Tiles> {
         Multimap<Long, Side> remainingSidesMap = HashMultimap.create();
         tileMap.keySet().forEach(id -> remainingSidesMap.putAll(id, Arrays.asList(Side.values())));
 
-//        Set<Long> idsToCheck = tileMap.keySet().stream().findFirst().map(Collections::singleton).orElseThrow();
-        Set<Long> idsToCheck = Collections.singleton(3079L);
+        Set<Long> idsToCheck = tileMap.keySet().stream().findFirst().map(Collections::singleton).orElseThrow();
         Set<Long> nextToCheck;
 
         while (!idsToCheck.isEmpty()) {

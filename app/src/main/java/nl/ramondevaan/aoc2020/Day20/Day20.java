@@ -2,10 +2,9 @@ package nl.ramondevaan.aoc2020.Day20;
 
 import nl.ramondevaan.aoc2020.util.Parser;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +12,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Day20 {
+
+    private static final String ESCAPED_LINE_SEPARATOR = StringEscapeUtils.escapeJava(System.lineSeparator());
+
     private final Tiles initialTiles;
 
     public Day20(List<String> lines) {
@@ -68,10 +70,8 @@ public class Day20 {
         String image = tiles.toImage();
         Matcher matcher = pattern.matcher(image);
 
-        int monsterCount = 0;
         int from = 0;
         while (matcher.find(from)) {
-            monsterCount++;
             int fromIndex = matcher.start();
             from = matcher.start() + 1;
             char[] chars = image.toCharArray();
@@ -100,26 +100,16 @@ public class Day20 {
     private String seaMonsterRegex(String[] seaMonster, int fieldSize) {
         int difference = fieldSize - seaMonster[0].length() + 1;
         return Arrays.stream(seaMonster).map(line -> line.replace(' ', '.'))
-                .collect(Collectors.joining("(.|\\n){" + difference + "}"));
-//        return seaMonster.replace(' ', '.').replace("#", "(?:#|O)");
+                .collect(Collectors.joining(String.format("(.|%s){%d}", ESCAPED_LINE_SEPARATOR, difference)));
     }
 
     private List<Integer> seaMonsterReplacementIndices(String[] seaMonster, int fieldSize) {
-        List<Integer> indices = new ArrayList<>();
-
-        int count = 0;
-        for (String line : seaMonster) {
-            int offset = count++ * (fieldSize + 1);
-            List<Integer> collect = IntStream.range(0, line.length())
+        return IntStream.range(0, seaMonster.length).flatMap(lineIndex -> {
+            int offset = lineIndex * (fieldSize + System.lineSeparator().length());
+            String line = seaMonster[lineIndex];
+            return IntStream.range(0, line.length())
                     .filter(index -> line.charAt(index) == '#')
-                    .map(index -> index + offset)
-                    .boxed()
-                    .collect(Collectors.toList());
-            indices.addAll(collect);
-        }
-
-        return Collections.unmodifiableList(indices);
-//        return IntStream.range(0, seaMonster.length()).filter(index -> seaMonster.charAt(index) == '#').boxed()
-//                .collect(Collectors.toUnmodifiableList());
+                    .map(index -> index + offset);
+        }).boxed().collect(Collectors.toUnmodifiableList());
     }
 }
