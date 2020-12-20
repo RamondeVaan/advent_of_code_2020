@@ -38,7 +38,7 @@ public class Day03 {
         return Stream.iterate(
                 new Coordinate(0, 0),
                 coordinate -> coordinate.y < yMax,
-                coordinate -> new Coordinate(coordinate.x + xDif, coordinate.y + yDif)
+                coordinate -> coordinate.add(xDif, yDif)
         );
     }
 }

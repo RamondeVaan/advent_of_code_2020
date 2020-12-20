@@ -1,6 +1,7 @@
 package nl.ramondevaan.aoc2020.day02;
 
 import nl.ramondevaan.aoc2020.util.Parser;
+import nl.ramondevaan.aoc2020.util.Validator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,8 +9,8 @@ import java.util.stream.Collectors;
 public class Day02 {
 
     private final List<PasswordEntry> passwords;
-    private final MatchCountPasswordEntryValidator matchCountPasswordEntryValidator;
-    private final OneOfPasswordEntryValidator oneOfPasswordEntryValidator;
+    private final Validator<PasswordEntry> matchCountPasswordEntryValidator;
+    private final Validator<PasswordEntry> oneOfPasswordEntryValidator;
 
     public Day02(List<String> lines) {
         Parser<String, PasswordEntry> parser = new PasswordEntryParser();

@@ -1,6 +1,5 @@
 package nl.ramondevaan.aoc2020.day11;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

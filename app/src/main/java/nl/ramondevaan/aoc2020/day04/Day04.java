@@ -3,6 +3,7 @@ package nl.ramondevaan.aoc2020.day04;
 import nl.ramondevaan.aoc2020.util.BlankStringPartitioner;
 import nl.ramondevaan.aoc2020.util.Parser;
 import nl.ramondevaan.aoc2020.util.Partitioner;
+import nl.ramondevaan.aoc2020.util.Validator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,8 +11,8 @@ import java.util.stream.Collectors;
 public class Day04 {
 
     private final List<Passport> passports;
-    private final PassportNotNullValidator passportNotNullValidator;
-    private final PassportValidator passportValidator;
+    private final Validator<Passport> passportNotNullValidator;
+    private final Validator<Passport> passportValidator;
 
     public Day04(List<String> lines) {
         Partitioner<String> partitioner = new BlankStringPartitioner();

@@ -1,4 +1,4 @@
-package nl.ramondevaan.aoc2020.Day20;
+package nl.ramondevaan.aoc2020.day20;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;

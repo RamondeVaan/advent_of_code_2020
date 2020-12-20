@@ -7,10 +7,6 @@ public class Vector2i {
     public int x;
     public int y;
 
-    public Vector2i add(Vector2i other) {
-        return new Vector2i(this.x + other.x, this.y + other.y);
-    }
-
     public Vector2i add(Vector2i other, int multiplicationFactor) {
         return new Vector2i(this.x + other.x * multiplicationFactor, this.y + other.y * multiplicationFactor);
     }

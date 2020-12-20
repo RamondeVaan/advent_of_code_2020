@@ -1,4 +1,4 @@
-package nl.ramondevaan.aoc2020.Day20;
+package nl.ramondevaan.aoc2020.day20;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
