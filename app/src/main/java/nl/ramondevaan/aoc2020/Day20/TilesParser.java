@@ -22,33 +22,31 @@ public class TilesParser implements Parser<List<String>, Tiles> {
     public Tiles parse(List<String> lines) {
         List<List<String>> partitions = partitioner.partition(lines);
 
-        Map<Long, Tile> tileMap = partitions.stream()
-                .map(parser::parse)
-                .collect(Collectors.toMap(Tile::getId, Function.identity()));
-        Table<Long, Side, Long> neighborTable = toNeighborTable(tileMap);
+        Set<Tile> tileMap = partitions.stream().map(parser::parse).collect(Collectors.toUnmodifiableSet());
+        Table<Tile, Side, Tile> neighborTable = toNeighborTable(tileMap);
 
         Set<Long> cornerTileIds = getCornerTileIds(neighborTable);
-        Tile[][] tiles = getTiles(neighborTable, tileMap);
+        Tile[][] tiles = getTiles(neighborTable);
         int[][] data = getData(tiles);
 
         return new Tiles(cornerTileIds, data);
     }
 
-    private Tile[][] getTiles(Table<Long, Side, Long> table, Map<Long, Tile> tileMap) {
-        Long topLeftTileId = getTopLeftCornerTileId(table);
+    private Tile[][] getTiles(Table<Tile, Side, Tile> table) {
+        Tile topLeftTile = getTopLeftCornerTile(table);
 
-        long tilesWidth = Stream.iterate(topLeftTileId, Objects::nonNull, id -> table.get(id, Side.RIGHT)).count();
-        long tilesHeight = Stream.iterate(topLeftTileId, Objects::nonNull, id -> table.get(id, Side.BOTTOM)).count();
+        long tilesWidth = Stream.iterate(topLeftTile, Objects::nonNull, tile -> table.get(tile, Side.RIGHT)).count();
+        long tilesHeight = Stream.iterate(topLeftTile, Objects::nonNull, tile -> table.get(tile, Side.BOTTOM)).count();
 
         Tile[][] tiles = new Tile[(int) tilesHeight][(int) tilesWidth];
 
         int x;
         int y = 0;
 
-        for (Long leftMostId = topLeftTileId; leftMostId != null; leftMostId = table.get(leftMostId, Side.BOTTOM)) {
+        for (Tile leftMost = topLeftTile; leftMost != null; leftMost = table.get(leftMost, Side.BOTTOM)) {
             x = 0;
-            for (Long id = leftMostId; id != null; id = table.get(id, Side.RIGHT)) {
-                tiles[y][x] = tileMap.get(id);
+            for (Tile tile = leftMost; tile != null; tile = table.get(tile, Side.RIGHT)) {
+                tiles[y][x] = tile;
                 x++;
             }
             y++;
@@ -77,23 +75,24 @@ public class TilesParser implements Parser<List<String>, Tiles> {
         return data;
     }
 
-    private Long getTopLeftCornerTileId(Table<Long, Side, Long> neighborTable) {
+    private Tile getTopLeftCornerTile(Table<Tile, Side, Tile> neighborTable) {
         return neighborTable.rowMap().entrySet().stream()
                 .filter(entry -> entry.getValue().get(Side.LEFT) == null && entry.getValue().get(Side.TOP) == null)
                 .map(Map.Entry::getKey)
                 .findFirst().orElseThrow();
     }
 
-    private Set<Long> getCornerTileIds(Table<Long, Side, Long> neighborTable) {
+    private Set<Long> getCornerTileIds(Table<Tile, Side, Tile> neighborTable) {
         return neighborTable.rowMap().entrySet().stream()
                 .filter(entry -> entry.getValue().size() == 2)
                 .map(Map.Entry::getKey)
+                .map(Tile::getId)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    private Table<Long, Side, Long> toNeighborTable(Map<Long, Tile> unmodifiableTileMap) {
-        Map<Long, Tile> tileMap = new HashMap<>(unmodifiableTileMap);
-        Table<Long, Side, Long> tileNeighborTable = HashBasedTable.create();
+    private Table<Tile, Side, Tile> toNeighborTable(Set<Tile> tiles) {
+        Map<Long, Tile> tileMap = tiles.stream().collect(Collectors.toMap(Tile::getId, Function.identity()));
+        Table<Tile, Side, Tile> tileNeighborTable = HashBasedTable.create();
         Multimap<Long, Side> remainingSidesMap = HashMultimap.create();
         tileMap.keySet().forEach(id -> remainingSidesMap.putAll(id, Arrays.asList(Side.values())));
 
@@ -116,8 +115,8 @@ public class TilesParser implements Parser<List<String>, Tiles> {
                         nextToCheck.add(match.id);
                         tileMap.put(match.id, match);
                         remainingSidesMap.remove(match.id, complement);
-                        tileNeighborTable.put(id, side, match.id);
-                        tileNeighborTable.put(match.id, complement, id);
+                        tileNeighborTable.put(tile, side, match);
+                        tileNeighborTable.put(match, complement, tile);
                     }
                 }
                 remainingSidesMap.removeAll(id);
