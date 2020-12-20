@@ -22,7 +22,7 @@ public class Tiles {
     public String toImage() {
         return Arrays.stream(values)
                 .map(codePoints -> new String(codePoints, 0, codePoints.length))
-                .collect(Collectors.joining());
+                .collect(Collectors.joining("\n"));
     }
 
     public Tiles flipLeftRight() {

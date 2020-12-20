@@ -3,7 +3,9 @@ package nl.ramondevaan.aoc2020.Day20;
 import nl.ramondevaan.aoc2020.util.Parser;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,7 +40,6 @@ public class Day20 {
 
         tiles = tiles.flipLeftRight();
 
-
         for (int i = 0; i < 4; i++) {
             image = findAndReplaceSeaMonsters(tiles);
             if (seaMonstersFound(image)) {
@@ -59,16 +60,20 @@ public class Day20 {
     }
 
     private String findAndReplaceSeaMonsters(Tiles tiles) {
-        String seaMonster = seaMonster(tiles.fieldWidth);
-        String seaMonsterRegex = seaMonsterRegex(seaMonster);
-        List<Integer> replacementIndices = seaMonsterReplacementIndices(seaMonster);
+        String[] seaMonster = seaMonster();
+        String seaMonsterRegex = seaMonsterRegex(seaMonster, tiles.fieldWidth);
+        List<Integer> replacementIndices = seaMonsterReplacementIndices(seaMonster, tiles.fieldWidth);
 
         Pattern pattern = Pattern.compile(seaMonsterRegex);
         String image = tiles.toImage();
         Matcher matcher = pattern.matcher(image);
 
-        while (matcher.find()) {
+        int monsterCount = 0;
+        int from = 0;
+        while (matcher.find(from)) {
+            monsterCount++;
             int fromIndex = matcher.start();
+            from = matcher.start() + 1;
             char[] chars = image.toCharArray();
             replacementIndices.stream()
                     .mapToInt(index -> fromIndex + index)
@@ -79,26 +84,42 @@ public class Day20 {
         return image;
     }
 
-    private String seaMonster(int fieldWidth) {
+    private String[] seaMonster() {
         String[] seaMonster = new String[]{
                 "                  # ",
                 "#    ##    ##    ###",
                 " #  #  #  #  #  #   "
         };
         int seaMonsterLength = Arrays.stream(seaMonster).mapToInt(String::length).max().orElseThrow();
-        int difference = fieldWidth - seaMonsterLength;
 
         return Arrays.stream(seaMonster)
                 .map(line -> StringUtils.rightPad(line, seaMonsterLength, ' '))
-                .collect(Collectors.joining(" ".repeat(difference)));
+                .toArray(String[]::new);
     }
 
-    private String seaMonsterRegex(String seaMonster) {
-        return seaMonster.replace(' ', '.').replace("#", "(?:#|O)");
+    private String seaMonsterRegex(String[] seaMonster, int fieldSize) {
+        int difference = fieldSize - seaMonster[0].length() + 1;
+        return Arrays.stream(seaMonster).map(line -> line.replace(' ', '.'))
+                .collect(Collectors.joining("(.|\\n){" + difference + "}"));
+//        return seaMonster.replace(' ', '.').replace("#", "(?:#|O)");
     }
 
-    private List<Integer> seaMonsterReplacementIndices(String seaMonster) {
-        return IntStream.range(0, seaMonster.length()).filter(index -> seaMonster.charAt(index) == '#').boxed()
-                .collect(Collectors.toUnmodifiableList());
+    private List<Integer> seaMonsterReplacementIndices(String[] seaMonster, int fieldSize) {
+        List<Integer> indices = new ArrayList<>();
+
+        int count = 0;
+        for (String line : seaMonster) {
+            int offset = count++ * (fieldSize + 1);
+            List<Integer> collect = IntStream.range(0, line.length())
+                    .filter(index -> line.charAt(index) == '#')
+                    .map(index -> index + offset)
+                    .boxed()
+                    .collect(Collectors.toList());
+            indices.addAll(collect);
+        }
+
+        return Collections.unmodifiableList(indices);
+//        return IntStream.range(0, seaMonster.length()).filter(index -> seaMonster.charAt(index) == '#').boxed()
+//                .collect(Collectors.toUnmodifiableList());
     }
 }
