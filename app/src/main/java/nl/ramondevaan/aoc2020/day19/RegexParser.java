@@ -4,21 +4,15 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import nl.ramondevaan.aoc2020.util.Parser;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RegexParser implements Parser<List<String>, String> {
-
-    private static final String DIGIT_REGEX = "\\d+";
-    private static final Pattern DIGIT_PATTERN = Pattern.compile(DIGIT_REGEX);
 
     @Override
     public String parse(List<String> lines) {
         Map<Integer, String> valueLines = new HashMap<>();
-        Map<Integer, String> referenceLines = new HashMap<>();
+        Map<Integer, Rule> referenceLines = new HashMap<>();
         Multimap<Integer, Integer> referencedBy = HashMultimap.create();
         Multimap<Integer, Integer> references = HashMultimap.create();
 
@@ -29,43 +23,64 @@ public class RegexParser implements Parser<List<String>, String> {
             if (value.startsWith("\"")) {
                 valueLines.put(index, value.substring(1, value.length() - 1));
             } else {
-                Matcher matcher = DIGIT_PATTERN.matcher(value);
-                while (matcher.find()) {
-                    int referenceIndex = Integer.parseInt(matcher.group());
-                    referencedBy.put(referenceIndex, index);
-                    references.put(index, referenceIndex);
-                }
-                referenceLines.put(index, "(?:" + value + ")");
+                Rule rule = parseRule(value);
+                rule.references().forEach(reference -> {
+                    referencedBy.put(reference, index);
+                    references.put(index, reference);
+                });
+
+                referenceLines.put(index, rule);
             }
         }
 
-        Map<Integer, String> lastValueLines = Map.copyOf(valueLines);
-        Map<Integer, String> nextValueLines;
+        Set<Integer> lastValueIndices = new HashSet<>(valueLines.keySet());
+        Set<Integer> nextValueIndices;
 
-        while (lastValueLines.size() > 0) {
-            nextValueLines = new HashMap<>();
+        while (!lastValueIndices.contains(0)) {
+            nextValueIndices = new HashSet<>();
 
-            for (Map.Entry<Integer, String> entry : lastValueLines.entrySet()) {
-                for (Integer referencer : referencedBy.get(entry.getKey())) {
-                    String regex = "[^\\d]" + entry.getKey() + "[^\\d]";
-                    Pattern pattern = Pattern.compile(regex);
-                    String referencerLine = referenceLines.remove(referencer);
-                    String result = "";
-                    //TODO: result
-//                            pattern.matcher(referencerLine).replaceAll()referencerLine.replaceAll(,
-//                            entry.getValue());
-                    references.remove(referencer, entry.getKey());
+            for (Integer valueIndex : lastValueIndices) {
+                for (Integer referencer : referencedBy.get(valueIndex)) {
+                    references.remove(referencer, valueIndex);
                     if (references.get(referencer).size() == 0) {
-                        String full = result.replace(" ", "");
-                        nextValueLines.put(referencer, full);
-                        valueLines.put(referencer, full);
+                        nextValueIndices.add(referencer);
+
+                        Rule rule = referenceLines.get(referencer);
+                        String regex = rule.toRegex(valueLines);
+                        valueLines.put(referencer, regex);
                     }
                 }
             }
 
-            lastValueLines = nextValueLines;
+            lastValueIndices = nextValueIndices;
         }
 
-        return null;
+        return valueLines.get(0);
+    }
+
+    private Rule parseRule(String value) {
+        int barIndex = value.indexOf('|');
+
+        if (barIndex >= 0) {
+            return parseOrRule(value, barIndex);
+        }
+
+        return parseConcatenateRule(value);
+    }
+
+    private OrRule parseOrRule(String value, int barIndex) {
+        List<Integer> leftReferences = parseIntegers(value.substring(0, barIndex));
+        List<Integer> rightReferences = parseIntegers(value.substring(barIndex + 1));
+
+        return new OrRule(leftReferences, rightReferences);
+    }
+
+    private ConcatenateRule parseConcatenateRule(String value) {
+        return new ConcatenateRule(parseIntegers(value));
+    }
+
+    private List<Integer> parseIntegers(String toParse) {
+        return Arrays.stream(toParse.trim().split("\\s+")).map(Integer::valueOf)
+                .collect(Collectors.toUnmodifiableList());
     }
 }
