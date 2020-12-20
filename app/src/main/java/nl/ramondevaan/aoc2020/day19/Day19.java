@@ -1,11 +1,17 @@
 package nl.ramondevaan.aoc2020.day19;
 
+import nl.ramondevaan.aoc2020.util.Parser;
+
 import java.util.List;
 
 public class Day19 {
 
-    public Day19(List<String> lines) {
+    private final String regex;
 
+    public Day19(List<String> lines) {
+        Parser<List<String>, String> parser = new RegexParser();
+
+        regex = parser.parse(lines);
     }
 
     public long solve1() {
