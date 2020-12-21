@@ -1,11 +1,9 @@
 package nl.ramondevaan.aoc2020.day21;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import nl.ramondevaan.aoc2020.util.Parser;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ProductsParser implements Parser<List<String>, Products> {
@@ -18,89 +16,56 @@ public class ProductsParser implements Parser<List<String>, Products> {
 
     @Override
     public Products parse(List<String> lines) {
-        Set<Ingredient> ingredients = new HashSet<>();
-        Set<Allergen> allergens = new HashSet<>();
-        Map<Ingredient, Long> ingredientOccurrences = new HashMap<>();
-        Set<Product> products = new HashSet<>();
-        Multimap<Ingredient, Allergen> potentialAllergensPerIngredient = HashMultimap.create();
-        Multimap<Allergen, Ingredient> potentialIngredientsPerAllergen = HashMultimap.create();
-        Map<Allergen, Ingredient> setIngredientsByAllergen = new HashMap<>();
-
-        for (String line : lines) {
-            Product product = parser.parse(line);
-            products.add(product);
-
-            ingredients.addAll(product.ingredients);
-            allergens.addAll(product.allergens);
-
-            product.ingredients.forEach(ingredient -> ingredientOccurrences.merge(ingredient, 1L, Long::sum));
-
-            for (Allergen allergen : product.allergens) {
-                Collection<Ingredient> potentialIngredients = potentialIngredientsPerAllergen.get(allergen);
-
-                if (potentialIngredients.isEmpty()) {
-                    potentialIngredientsPerAllergen.putAll(allergen, product.ingredients);
-                    product.ingredients.forEach(ingredient ->
-                            potentialAllergensPerIngredient.put(ingredient, allergen));
-                } else {
-                    Set<Ingredient> difference = potentialIngredients.stream()
-                            .filter(ingredient -> !product.ingredients.contains(ingredient))
-                            .collect(Collectors.toSet());
-                    difference.forEach(ingredient -> potentialAllergensPerIngredient.remove(ingredient, allergen));
-                    potentialIngredients.removeAll(difference);
-                    potentialIngredients.retainAll(product.ingredients);
-                    if (potentialIngredients.size() == 1) {
-                        setIngredientsByAllergen.put(allergen, potentialIngredients.iterator().next());
-                    }
-                }
-            }
-        }
-
-        Map<Allergen, Ingredient> ingredientsByAllergen = reduce(potentialIngredientsPerAllergen,
-                potentialAllergensPerIngredient, setIngredientsByAllergen);
+        Set<Product> products = lines.stream().map(parser::parse).collect(Collectors.toUnmodifiableSet());
+        Map<Ingredient, Long> ingredientOccurrences = products.stream().flatMap(product -> product.ingredients.stream())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        Map<Allergen, Ingredient> ingredientsByAllergen = computeAllergenToIngredientMap(products);
 
         return new Products(
-                Collections.unmodifiableSet(ingredients),
-                Collections.unmodifiableSet(allergens),
-                Collections.unmodifiableSet(products),
+                products,
                 Collections.unmodifiableMap(ingredientsByAllergen),
                 Collections.unmodifiableMap(ingredientOccurrences)
         );
     }
 
-    private Map<Allergen, Ingredient> reduce(Multimap<Allergen, Ingredient> potentialIngredientsPerAllergen,
-                                             Multimap<Ingredient, Allergen> potentialAllergensPerIngredient,
-                                             Map<Allergen, Ingredient> initial) {
-        Map<Allergen, Ingredient> ingredientsByAllergen = new HashMap<>(initial);
+    private Map<Allergen, Ingredient> computeAllergenToIngredientMap(Set<Product> products) {
+        Map<Allergen, Set<Ingredient>> potentialIngredientsPerAllergen = getPotentialIngredientsPerAllergen(products);
+        Map<Allergen, Ingredient> ingredientsByAllergen = new HashMap<>();
 
-        Map<Allergen, Ingredient> toCheck = new HashMap<>(initial);
-        Map<Allergen, Ingredient> next;
+        Map<Allergen, Ingredient> toCheck;
 
-        while (!toCheck.isEmpty()) {
-            next = new HashMap<>();
-            for (Map.Entry<Allergen, Ingredient> entry : toCheck.entrySet()) {
-                Allergen allergen = entry.getKey();
-                Ingredient ingredient = entry.getValue();
-
-                Set<Allergen> potentialAllergens = new HashSet<>(potentialAllergensPerIngredient.get(ingredient));
-                Set<Allergen> difference = Sets.difference(potentialAllergens, Set.of(allergen));
-
-                for (Allergen allergenToRemove : difference) {
-                    potentialAllergensPerIngredient.remove(ingredient, allergenToRemove);
-                    potentialIngredientsPerAllergen.remove(allergenToRemove, ingredient);
-
-                    Collection<Ingredient> result = potentialIngredientsPerAllergen.get(allergenToRemove);
-                    if (result.size() == 1) {
-                        for (Ingredient setIngredient : result) {
-                            ingredientsByAllergen.put(allergenToRemove, setIngredient);
-                            next.put(allergenToRemove, setIngredient);
-                        }
-                    }
-                }
+        while (!(toCheck = getSingleValueEntries(potentialIngredientsPerAllergen)).isEmpty()) {
+            ingredientsByAllergen.putAll(toCheck);
+            for (Ingredient ingredient : toCheck.values()) {
+                potentialIngredientsPerAllergen.values()
+                        .forEach(potentialIngredients -> potentialIngredients.remove(ingredient));
             }
-            toCheck = next;
         }
 
         return ingredientsByAllergen;
+    }
+
+    private Map<Allergen, Set<Ingredient>> getPotentialIngredientsPerAllergen(Set<Product> products) {
+        Map<Allergen, Set<Ingredient>> potentialIngredientsPerAllergen = new HashMap<>();
+
+        for (Product product : products) {
+            for (Allergen allergen : product.allergens) {
+                Set<Ingredient> potentialIngredients = potentialIngredientsPerAllergen.get(allergen);
+
+                if (potentialIngredients == null) {
+                    potentialIngredientsPerAllergen.put(allergen, new HashSet<>(product.ingredients));
+                } else {
+                    potentialIngredients.retainAll(product.ingredients);
+                }
+            }
+        }
+
+        return potentialIngredientsPerAllergen;
+    }
+
+    private <T, U> Map<T, U> getSingleValueEntries(Map<T, ? extends Collection<U>> map) {
+        return map.entrySet().stream()
+                .filter(entry -> entry.getValue().size() == 1)
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().iterator().next()));
     }
 }

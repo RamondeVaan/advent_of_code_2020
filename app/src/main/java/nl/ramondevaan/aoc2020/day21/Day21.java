@@ -18,7 +18,7 @@ public class Day21 {
     public long solve1() {
         Set<Ingredient> ingredientsWithAllergens = new HashSet<>(products.ingredientsByAllergen.values());
 
-        return Sets.difference(products.ingredients, ingredientsWithAllergens).stream()
+        return Sets.difference(products.getIngredients(), ingredientsWithAllergens).stream()
                 .mapToLong(products.ingredientOccurrences::get)
                 .sum();
     }

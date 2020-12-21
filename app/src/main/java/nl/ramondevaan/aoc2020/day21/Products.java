@@ -7,9 +7,11 @@ import java.util.Set;
 
 @Value
 public class Products {
-    public Set<Ingredient> ingredients;
-    public Set<Allergen> allergens;
     public Set<Product> products;
     public Map<Allergen, Ingredient> ingredientsByAllergen;
     public Map<Ingredient, Long> ingredientOccurrences;
+
+    public Set<Ingredient> getIngredients() {
+        return ingredientOccurrences.keySet();
+    }
 }
