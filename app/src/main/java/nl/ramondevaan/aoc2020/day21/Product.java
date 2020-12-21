@@ -6,6 +6,6 @@ import java.util.Set;
 
 @Value
 public class Product {
-    public Set<String> ingredients;
-    public Set<String> allergens;
+    public Set<Ingredient> ingredients;
+    public Set<Allergen> allergens;
 }

@@ -14,8 +14,12 @@ public class ProductParser implements Parser<String, Product> {
         String before = toParse.substring(0, index - 1);
         String after = toParse.substring(index + 10, toParse.length() - 1);
 
-        Set<String> ingredients = Arrays.stream(before.split(" ")).collect(Collectors.toUnmodifiableSet());
-        Set<String> allergens = Arrays.stream(after.split(", ")).collect(Collectors.toUnmodifiableSet());
+        Set<Ingredient> ingredients = Arrays.stream(before.split(" "))
+                .map(Ingredient::new)
+                .collect(Collectors.toUnmodifiableSet());
+        Set<Allergen> allergens = Arrays.stream(after.split(", "))
+                .map(Allergen::new)
+                .collect(Collectors.toUnmodifiableSet());
 
         return new Product(ingredients, allergens);
     }
