@@ -6,7 +6,6 @@ import com.google.common.collect.Sets;
 import nl.ramondevaan.aoc2020.util.Parser;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ProductsParser implements Parser<List<String>, Products> {
@@ -19,44 +18,62 @@ public class ProductsParser implements Parser<List<String>, Products> {
 
     @Override
     public Products parse(List<String> lines) {
-        Set<Product> products = lines.stream().map(parser::parse).collect(Collectors.toUnmodifiableSet());
-
-        return parseProducts(products);
-    }
-
-    private Products parseProducts(Set<Product> products) {
-        Set<Ingredient> ingredients = products.stream().flatMap(product -> product.ingredients.stream())
-                .collect(Collectors.toUnmodifiableSet());
-        Set<Allergen> allergens = products.stream().flatMap(product -> product.allergens.stream())
-                .collect(Collectors.toUnmodifiableSet());
-
+        Set<Ingredient> ingredients = new HashSet<>();
+        Set<Allergen> allergens = new HashSet<>();
+        Map<Ingredient, Long> ingredientOccurrences = new HashMap<>();
+        Set<Product> products = new HashSet<>();
         Multimap<Ingredient, Allergen> potentialAllergensPerIngredient = HashMultimap.create();
-        ingredients.forEach(ingredient -> potentialAllergensPerIngredient.putAll(ingredient, allergens));
-
         Multimap<Allergen, Ingredient> potentialIngredientsPerAllergen = HashMultimap.create();
-        allergens.forEach(allergen -> potentialIngredientsPerAllergen.putAll(allergen, ingredients));
+        Map<Allergen, Ingredient> setIngredientsByAllergen = new HashMap<>();
 
-        Map<Allergen, Ingredient> allergenToIngredientMap = new HashMap<>();
+        for (String line : lines) {
+            Product product = parser.parse(line);
+            products.add(product);
 
-        for (Product product : products) {
+            ingredients.addAll(product.ingredients);
+            allergens.addAll(product.allergens);
+
+            product.ingredients.forEach(ingredient -> ingredientOccurrences.merge(ingredient, 1L, Long::sum));
+
             for (Allergen allergen : product.allergens) {
-                Set<Ingredient> potentialIngredients = new HashSet<>(potentialIngredientsPerAllergen.get(allergen));
+                Collection<Ingredient> potentialIngredients = potentialIngredientsPerAllergen.get(allergen);
 
-                Sets.SetView<Ingredient> difference = Sets.difference(potentialIngredients, product.ingredients);
-
-                for (Ingredient ingredient : difference) {
-                    potentialIngredientsPerAllergen.remove(allergen, ingredient);
-                    potentialAllergensPerIngredient.remove(ingredient, allergen);
-                }
-
-                Collection<Ingredient> result = potentialIngredientsPerAllergen.get(allergen);
-                if (result.size() == 1) {
-                    result.forEach(ingredient -> allergenToIngredientMap.put(allergen, ingredient));
+                if (potentialIngredients.isEmpty()) {
+                    potentialIngredientsPerAllergen.putAll(allergen, product.ingredients);
+                    product.ingredients.forEach(ingredient ->
+                            potentialAllergensPerIngredient.put(ingredient, allergen));
+                } else {
+                    Set<Ingredient> difference = potentialIngredients.stream()
+                            .filter(ingredient -> !product.ingredients.contains(ingredient))
+                            .collect(Collectors.toSet());
+                    difference.forEach(ingredient -> potentialAllergensPerIngredient.remove(ingredient, allergen));
+                    potentialIngredients.removeAll(difference);
+                    potentialIngredients.retainAll(product.ingredients);
+                    if (potentialIngredients.size() == 1) {
+                        setIngredientsByAllergen.put(allergen, potentialIngredients.iterator().next());
+                    }
                 }
             }
         }
 
-        Map<Allergen, Ingredient> toCheck = new HashMap<>(allergenToIngredientMap);
+        Map<Allergen, Ingredient> ingredientsByAllergen = reduce(potentialIngredientsPerAllergen,
+                potentialAllergensPerIngredient, setIngredientsByAllergen);
+
+        return new Products(
+                Collections.unmodifiableSet(ingredients),
+                Collections.unmodifiableSet(allergens),
+                Collections.unmodifiableSet(products),
+                Collections.unmodifiableMap(ingredientsByAllergen),
+                Collections.unmodifiableMap(ingredientOccurrences)
+        );
+    }
+
+    private Map<Allergen, Ingredient> reduce(Multimap<Allergen, Ingredient> potentialIngredientsPerAllergen,
+                                             Multimap<Ingredient, Allergen> potentialAllergensPerIngredient,
+                                             Map<Allergen, Ingredient> initial) {
+        Map<Allergen, Ingredient> ingredientsByAllergen = new HashMap<>(initial);
+
+        Map<Allergen, Ingredient> toCheck = new HashMap<>(initial);
         Map<Allergen, Ingredient> next;
 
         while (!toCheck.isEmpty()) {
@@ -75,7 +92,7 @@ public class ProductsParser implements Parser<List<String>, Products> {
                     Collection<Ingredient> result = potentialIngredientsPerAllergen.get(allergenToRemove);
                     if (result.size() == 1) {
                         for (Ingredient setIngredient : result) {
-                            allergenToIngredientMap.put(allergenToRemove, setIngredient);
+                            ingredientsByAllergen.put(allergenToRemove, setIngredient);
                             next.put(allergenToRemove, setIngredient);
                         }
                     }
@@ -84,16 +101,6 @@ public class ProductsParser implements Parser<List<String>, Products> {
             toCheck = next;
         }
 
-        Map<Ingredient, Long> ingredientOccurrences = products.stream()
-                .flatMap(product -> product.ingredients.stream())
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-        return new Products(
-                ingredients,
-                allergens,
-                products,
-                allergenToIngredientMap,
-                ingredientOccurrences
-        );
+        return ingredientsByAllergen;
     }
 }
