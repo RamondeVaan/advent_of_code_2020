@@ -3,7 +3,6 @@ package nl.ramondevaan.aoc2020.day22;
 import nl.ramondevaan.aoc2020.util.BlankStringPartitioner;
 import nl.ramondevaan.aoc2020.util.Parser;
 import nl.ramondevaan.aoc2020.util.Partitioner;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import java.util.*;
 
@@ -45,11 +44,10 @@ public class Day22 {
     }
 
     public long solve2() {
-        ImmutableTriple<Deque<Integer>, Deque<Integer>, Boolean> end = playOut(initialCardsPlayer1,
-                initialCardsPlayer1.size(), initialCardsPlayer2, initialCardsPlayer2.size());
+        Result result = playOut(initialCardsPlayer1, initialCardsPlayer2);
 
-        long score1 = score(end.left);
-        long score2 = score(end.middle);
+        long score1 = score(result.cardsPlayer1);
+        long score2 = score(result.cardsPlayer2);
 
         return score1 + score2;
     }
@@ -65,28 +63,31 @@ public class Day22 {
         return score;
     }
 
-    public ImmutableTriple<Deque<Integer>, Deque<Integer>, Boolean> playOut(Collection<Integer> c1, int s1,
-                                                                            Collection<Integer> c2, int s2) {
-        Deque<Integer> cardsPlayer1 = copy(c1, s1);
-        Deque<Integer> cardsPlayer2 = copy(c2, s2);
+    private Result playOut(Collection<Integer> cardsPlayer1, Collection<Integer> cardsPlayer2) {
+        return playOut(cardsPlayer1, cardsPlayer2.size(), cardsPlayer2, cardsPlayer2.size());
+    }
+
+    private Result playOut(Collection<Integer> cards1, int limit1, Collection<Integer> cards2, int limit2) {
+        Deque<Integer> cardsPlayer1 = copy(cards1, limit1);
+        Deque<Integer> cardsPlayer2 = copy(cards2, limit2);
 
         Set<Integer> previousStates = new HashSet<>();
         while (!cardsPlayer1.isEmpty() && !cardsPlayer2.isEmpty()) {
             if (!previousStates.add(hash(cardsPlayer1, cardsPlayer2))) {
-                return ImmutableTriple.of(cardsPlayer1, cardsPlayer2, true);
+                return new Result(cardsPlayer1, cardsPlayer2, true);
             }
 
             int card1 = cardsPlayer1.pop();
             int card2 = cardsPlayer2.pop();
 
-            boolean playerOneWins;
+            boolean player1Wins;
             if (cardsPlayer1.size() >= card1 && cardsPlayer2.size() >= card2) {
-                playerOneWins = playOut(cardsPlayer1, card1, cardsPlayer2, card2).right;
+                player1Wins = playOut(cardsPlayer1, card1, cardsPlayer2, card2).player1Wins;
             } else {
-                playerOneWins = card1 > card2;
+                player1Wins = card1 > card2;
             }
 
-            if (playerOneWins) {
+            if (player1Wins) {
                 cardsPlayer1.addLast(card1);
                 cardsPlayer1.addLast(card2);
             } else {
@@ -95,7 +96,7 @@ public class Day22 {
             }
         }
 
-        return ImmutableTriple.of(cardsPlayer1, cardsPlayer2, cardsPlayer2.isEmpty());
+        return new Result(cardsPlayer1, cardsPlayer2, cardsPlayer2.isEmpty());
     }
 
     private int hash(Deque<Integer> cards1, Deque<Integer> cards2) {
