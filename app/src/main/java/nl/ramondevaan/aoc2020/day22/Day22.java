@@ -104,12 +104,12 @@ public class Day22 {
     }
 
     private Deque<Integer> copy(Collection<Integer> cards, int size) {
-        Deque<Integer> ret = new ArrayDeque<>(cards);
+        Deque<Integer> ret = new ArrayDeque<>(size);
 
-        int toDelete = ret.size() - size;
-
-        for (int i = 0; i < toDelete; i++) {
-            ret.removeLast();
+        Iterator<Integer> iterator = cards.iterator();
+        int count = 0;
+        while (count++ < size) {
+            ret.add(iterator.next());
         }
 
         return ret;
