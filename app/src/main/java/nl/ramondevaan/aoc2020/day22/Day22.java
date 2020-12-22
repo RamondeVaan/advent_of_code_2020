@@ -20,7 +20,7 @@ public class Day22 {
         initialCardsPlayer2 = parser.parse(partitions.get(1));
     }
 
-    public long solve1() {
+    public int solve1() {
         Deque<Integer> cardsPlayer1 = new ArrayDeque<>(initialCardsPlayer1);
         Deque<Integer> cardsPlayer2 = new ArrayDeque<>(initialCardsPlayer2);
 
@@ -37,24 +37,24 @@ public class Day22 {
             }
         }
 
-        long score1 = score(cardsPlayer1);
-        long score2 = score(cardsPlayer2);
+        int score1 = score(cardsPlayer1);
+        int score2 = score(cardsPlayer2);
 
         return score1 + score2;
     }
 
-    public long solve2() {
+    public int solve2() {
         Result result = playOut(initialCardsPlayer1, initialCardsPlayer2);
 
-        long score1 = score(result.cardsPlayer1);
-        long score2 = score(result.cardsPlayer2);
+        int score1 = score(result.cardsPlayer1);
+        int score2 = score(result.cardsPlayer2);
 
         return score1 + score2;
     }
 
-    private long score(Collection<Integer> cards) {
-        long score = 0L;
-        long multiplier = cards.size();
+    private int score(Collection<Integer> cards) {
+        int score = 0;
+        int multiplier = cards.size();
 
         for (int card : cards) {
             score += card * multiplier--;
@@ -100,7 +100,7 @@ public class Day22 {
     }
 
     private int hash(Deque<Integer> cards1, Deque<Integer> cards2) {
-        return Objects.hash(new ArrayList<>(cards1), new ArrayList<>(cards2));
+        return (score(cards1) << 16) + score(cards2);
     }
 
     private Deque<Integer> copy(Collection<Integer> cards, int size) {
