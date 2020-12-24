@@ -69,10 +69,8 @@ public class Cups {
             destination = destination.minusOne;
         }
 
-        pickedUp[PICK_UP_MINUS_ONE].next = destination.next;
-        destination.next.previous = pickedUp[PICK_UP_MINUS_ONE];
-        destination.next = pickedUp[0];
-        pickedUp[0].previous = destination;
+        connect(pickedUp[PICK_UP_MINUS_ONE], destination.next);
+        connect(destination, pickedUp[0]);
 
         current = current.next;
     }
@@ -84,8 +82,7 @@ public class Cups {
             last = last.next;
             cups[i] = last;
         }
-        current.next = last.next;
-        last.next.previous = current;
+        connect(current, last.next);
 
         return cups;
     }
@@ -98,6 +95,11 @@ public class Cups {
         }
 
         return false;
+    }
+
+    private void connect(Cup previous, Cup next) {
+        previous.next = next;
+        next.previous = previous;
     }
 
     @EqualsAndHashCode(of = "label")
