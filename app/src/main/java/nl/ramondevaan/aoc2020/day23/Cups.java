@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -20,51 +21,48 @@ public class Cups {
     public Cups(List<Integer> cupLabels, int size) {
         Map<Integer, Cup> map = new HashMap<>();
 
-        Cup cup = null;
-        if (cupLabels.size() > 0) {
-            cup = new Cup(null, null, cupLabels.get(0));
-            map.put(cup.label, cup);
-            current = cup;
-            for (int index = 1; index < cupLabels.size(); index++) {
-                int label = cupLabels.get(index);
-                Cup next = new Cup(null, null, label);
-                cup.next = next;
-                map.put(label, next);
-                cup = next;
-            }
-            for (Cup c : map.values()) {
-                c.minusOne = map.get(c.label - 1);
-            }
-        }
-
+        ListIterator<Integer> iterator = cupLabels.listIterator(cupLabels.size());
+        Cup max;
         if (size > cupLabels.size()) {
-            Cup minusOne = map.get(cupLabels.size());
-            Cup next = new Cup(null, minusOne, cupLabels.size() + 1);
-            if (cup != null) {
-                cup.next = next;
-            } else {
-                current = next;
-            }
+            max = new Cup(null, null, size);
+        } else {
+            int label = iterator.previous();
+            max = new Cup(null, null, label);
+            map.put(label, max);
+        }
+        Cup cup = max;
+        Cup next;
+
+        for (int label = size - 1; label > cupLabels.size(); label--) {
+            next = new Cup(cup, null, label);
+            cup.minusOne = next;
             cup = next;
-            map.put(cup.label, cup);
-            for (int i = cupLabels.size() + 2; i <= size; i++) {
-                next = new Cup(null, cup, i);
-                cup.next = next;
-                cup = next;
+        }
+        while (iterator.hasPrevious()) {
+            int label = iterator.previous();
+            next = new Cup(cup, null, label);
+            map.put(label, next);
+            cup = next;
+        }
+        for (Cup c : map.values()) {
+            c.minusOne = map.get(c.label - 1);
+        }
+
+        current = cup;
+        max.next = cup;
+
+        if (cupLabels.isEmpty()) {
+            one = cup;
+            one.minusOne = max;
+        } else {
+            one = map.get(1);
+            if (size > cupLabels.size()) {
+                one.minusOne = max;
+                map.get(cupLabels.get(cupLabels.size() - 1)).next.minusOne = map.get(cupLabels.size());
+            } else {
+                one.minusOne = map.get(cupLabels.size());
             }
         }
-
-        if (cup == null) {
-            throw new IllegalStateException();
-        }
-
-        cup.next = current;
-
-        Cup max = map.get(cupLabels.size());
-        max = cup.label > max.label ? cup : max;
-
-        one = map.get(1);
-        one.minusOne = max;
     }
 
     public IntStream fromOne() {
