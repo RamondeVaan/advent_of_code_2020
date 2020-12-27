@@ -18,16 +18,9 @@ public class Day23 {
             cups.playRound();
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-        Cups.Cup one = cups.one;
-        Cups.Cup next = one.next;
-
-        while (next.label != one.label) {
-            stringBuilder.append(next.label);
-            next = next.next;
-        }
-
-        return stringBuilder.toString();
+        return cups.fromOne()
+                .mapToObj(String::valueOf)
+                .collect(Collectors.joining());
     }
 
     public long solve2() {
@@ -37,24 +30,8 @@ public class Day23 {
             cups.playRound();
         }
 
-        Cups.Cup oneNext = cups.one.next;
-        long oneNextLabel = oneNext.label;
-        long oneNextNextLabel = oneNext.next.label;
-
-        return oneNextLabel * oneNextNextLabel;
-
-//        Deque<Integer> deque = solve(initialCups, 1000000, 10000000);
-//
-//        int one;
-//
-//        do {
-//            one = deque.removeFirst();
-//            deque.addLast(one);
-//        } while(one != 1);
-//
-//        long oneAfterOne = deque.removeFirst();
-//        long twoAfterOne = deque.removeFirst();
-//
-//        return oneAfterOne * twoAfterOne;
+        return cups.fromOne()
+                .mapToLong(Long::valueOf).limit(2)
+                .reduce(1L, (left, right) -> left * right);
     }
 }

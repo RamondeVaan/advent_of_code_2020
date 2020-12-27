@@ -36,25 +36,24 @@ public class Day24 {
     }
 
     public int solve2() {
-        class Holder {
-            Set<Coordinate> blackTiles;
-        }
-
-        Holder holder = new Holder();
-        holder.blackTiles = initialBlackTiles;
+        Set<Coordinate> blackTiles = initialBlackTiles;
 
         for (int i = 0; i < 100; i++) {
-            Map<Coordinate, Long> collect = holder.blackTiles.stream().flatMap(Coordinate::neighbors)
+            Map<Coordinate, Long> blackNeighborTiles = blackTiles.stream().flatMap(Coordinate::neighbors)
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-            holder.blackTiles.forEach(coordinate -> collect.putIfAbsent(coordinate, 0L));
+            blackTiles.forEach(coordinate -> blackNeighborTiles.putIfAbsent(coordinate, 0L));
 
-            holder.blackTiles = collect.entrySet().stream()
-                    .filter(entry -> entry.getValue() == 2 ||
-                            (entry.getValue() == 1 && holder.blackTiles.contains(entry.getKey())))
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toUnmodifiableSet());
+            blackTiles = nextBlackTiles(blackTiles, blackNeighborTiles);
         }
 
-        return holder.blackTiles.size();
+        return blackTiles.size();
+    }
+
+    private Set<Coordinate> nextBlackTiles(Set<Coordinate> blackTiles, Map<Coordinate, Long> blackNeighborTiles) {
+        return blackNeighborTiles.entrySet().stream()
+                .filter(entry -> entry.getValue() == 2 ||
+                        (entry.getValue() == 1 && blackTiles.contains(entry.getKey())))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toUnmodifiableSet());
     }
 }

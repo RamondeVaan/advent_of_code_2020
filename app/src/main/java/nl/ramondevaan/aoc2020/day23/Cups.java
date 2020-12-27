@@ -6,25 +6,28 @@ import lombok.EqualsAndHashCode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Cups {
 
     private static final int PICK_UP = 3;
     private static final int PICK_UP_MINUS_ONE = PICK_UP - 1;
+
     private Cup current;
-    public final Cup one;
+    private final Cup one;
 
     public Cups(List<Integer> cupLabels, int size) {
         Map<Integer, Cup> map = new HashMap<>();
 
         Cup cup = null;
         if (cupLabels.size() > 0) {
-            cup = new Cup(null, null, null, cupLabels.get(0));
+            cup = new Cup(null, null, cupLabels.get(0));
             map.put(cup.label, cup);
             current = cup;
             for (int index = 1; index < cupLabels.size(); index++) {
                 int label = cupLabels.get(index);
-                Cup next = new Cup(cup, null, null, label);
+                Cup next = new Cup(null, null, label);
                 cup.next = next;
                 map.put(label, next);
                 cup = next;
@@ -36,21 +39,25 @@ public class Cups {
 
         if (size > cupLabels.size()) {
             Cup minusOne = map.get(cupLabels.size());
-            cup = new Cup(cup, null, minusOne, cupLabels.size() + 1);
-            if (cup.previous != null) {
-                cup.previous.next = cup;
+            Cup next = new Cup(null, minusOne, cupLabels.size() + 1);
+            if (cup != null) {
+                cup.next = next;
             } else {
-                current = cup;
+                current = next;
             }
+            cup = next;
             map.put(cup.label, cup);
             for (int i = cupLabels.size() + 2; i <= size; i++) {
-                Cup next = new Cup(cup, null, cup, i);
+                next = new Cup(null, cup, i);
                 cup.next = next;
                 cup = next;
             }
         }
 
-        current.previous = cup;
+        if (cup == null) {
+            throw new IllegalStateException();
+        }
+
         cup.next = current;
 
         Cup max = map.get(cupLabels.size());
@@ -58,6 +65,11 @@ public class Cups {
 
         one = map.get(1);
         one.minusOne = max;
+    }
+
+    public IntStream fromOne() {
+        return Stream.iterate(one.next, cup -> cup != one, cup -> cup.next)
+                .mapToInt(cup -> cup.label);
     }
 
     public void playRound() {
@@ -99,13 +111,11 @@ public class Cups {
 
     private void connect(Cup previous, Cup next) {
         previous.next = next;
-        next.previous = previous;
     }
 
     @EqualsAndHashCode(of = "label")
     @AllArgsConstructor
     public static class Cup {
-        Cup previous;
         Cup next;
         Cup minusOne;
         int label;
