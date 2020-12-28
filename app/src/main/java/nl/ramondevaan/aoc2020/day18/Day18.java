@@ -1,6 +1,7 @@
 package nl.ramondevaan.aoc2020.day18;
 
 import java.util.List;
+import java.util.Map;
 
 public class Day18 {
 
@@ -11,17 +12,22 @@ public class Day18 {
     }
 
     public long solve1() {
-        StringFunction leftToRight = new OperatorStringFunction();
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(List.of(new RemoveParenthesesStringFunction(),
-                new ParenthesesStringFunction(List.of(leftToRight)), leftToRight));
-        return lines.stream().mapToLong(evaluator::evaluate).sum();
+        Map<Character, Operator> operatorMap = Map.of(
+                '+', Operator.of(1, Long::sum),
+                '*', Operator.of(1, (left, right) -> left * right)
+        );
+        ExpressionParser parser = new ExpressionParser(operatorMap);
+
+        return lines.stream().mapToLong(parser::parse).sum();
     }
 
     public long solve2() {
-        StringFunction add = new AddStringFunction();
-        StringFunction multiply = new MultiplyStringFunction();
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(List.of(new RemoveParenthesesStringFunction(),
-                new ParenthesesStringFunction(List.of(add, multiply)), add, multiply));
-        return lines.stream().mapToLong(evaluator::evaluate).sum();
+        Map<Character, Operator> operatorMap = Map.of(
+                '+', Operator.of(2, Long::sum),
+                '*', Operator.of(1, (left, right) -> left * right)
+        );
+        ExpressionParser parser = new ExpressionParser(operatorMap);
+
+        return lines.stream().mapToLong(parser::parse).sum();
     }
 }

@@ -6,108 +6,122 @@ import nl.ramondevaan.aoc2020.util.Parser;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Objects;
 
 @Value
-public class ExpressionParser implements Parser<String, Expression> {
+public class ExpressionParser implements Parser<String, Long> {
 
-    Map<ExpressionType, Integer> precedence;
+    Map<Character, Operator> operatorMap;
 
     @Override
-    public Expression parse(String toParse) {
-        Deque<Expression> stack = new ArrayDeque<>();
-        AtomicInteger currentIndex = new AtomicInteger(1);
-
-        while (currentIndex.get() < toParse.length()) {
-            parseNext(toParse, currentIndex, stack);
-        }
-
-        Expression topExpression = stack.pop();
-        Expression parent;
-
-        while ((parent = topExpression.getParent()) != null) {
-            topExpression = parent;
-        }
-
-        return topExpression;
+    public Long parse(String toParse) {
+        ExpressionParserImpl impl = new ExpressionParserImpl(operatorMap, toParse);
+        return impl.parse();
     }
 
-    private void parseNext(String toParse, AtomicInteger currentIndex, Deque<Expression> stack) {
-        char current = toParse.charAt(currentIndex.get() - 1);
+    private static class ExpressionParserImpl {
+        Map<Character, Operator> operatorMap;
 
-        while (currentIndex.get() < toParse.length() && Character.isWhitespace(current)) {
-            current = toParse.charAt(currentIndex.getAndIncrement());
-        }
-        if (Character.isWhitespace(current)) {
-            return;
-        }
+        Deque<Long> numberStack;
+        Deque<Character> operatorStack;
 
-        if (Character.isDigit(current)) {
-            parseNumber(toParse, currentIndex, stack, current);
-        } else if (current == '+') {
-            parseAddition(toParse, currentIndex, stack);
-        } else if (current == '*') {
-            parseMultiplication(toParse, currentIndex, stack);
-        }
-    }
+        String toParse;
+        int nextIndex;
+        Character current;
 
-    private void parseNumber(String toParse, AtomicInteger currentIndex, Deque<Expression> stack, char current) {
-        StringBuilder numberBuilder = new StringBuilder();
+        public ExpressionParserImpl(Map<Character, Operator> operatorMap, String toParse) {
+            this.operatorMap = operatorMap;
 
-        while (currentIndex.get() < toParse.length() && Character.isDigit(current)) {
-            numberBuilder.append(current);
-            current = toParse.charAt(currentIndex.getAndIncrement());
-        }
-        if (Character.isDigit(current)) {
-            numberBuilder.append(current);
+            numberStack = new ArrayDeque<>();
+            operatorStack = new ArrayDeque<>();
+
+            this.toParse = toParse;
         }
 
-        NumberExpression expression = new NumberExpression(Long.parseLong(numberBuilder.toString()));
-
-        Expression top = stack.pollFirst();
-        if (top != null) {
-            expression.setParent(top);
-            top.addRight(expression);
-        }
-        stack.push(expression);
-    }
-
-    private void parseAddition(String toParse, AtomicInteger currentIndex, Deque<Expression> stack) {
-        setBinaryOperator(new AdditionExpression(), currentIndex, stack);
-    }
-
-    private void parseMultiplication(String toParse, AtomicInteger currentIndex, Deque<Expression> stack) {
-        setBinaryOperator(new MultiplicationExpression(), currentIndex, stack);
-    }
-
-    private void setBinaryOperator(Expression expression, AtomicInteger currentIndex, Deque<Expression> stack) {
-        int expressionPrecedence = precedence.get(expression.getType());
-
-        Expression lastExpression = stack.pop();
-        int lastPrecedence = precedence.get(lastExpression.getType());
-
-        if (lastPrecedence >= expressionPrecedence) {
-            Expression parent = lastExpression.getParent();
-
-            while (parent != null && precedence.get(parent.getType()) >= expressionPrecedence) {
-                lastExpression = parent;
-                parent = lastExpression.getParent();
-            }
-            if (parent != null) {
-                parent.addRight(expression);
-                expression.setParent(parent);
+        public long parse() {
+            next();
+            while (current != null) {
+                readNext();
             }
 
-            lastExpression.setParent(expression);
-            expression.addLeft(lastExpression);
-        } else {
-            Expression childExpression = lastExpression.getRight();
-            childExpression.setParent(expression);
-            expression.addLeft(childExpression);
-            expression.setParent(lastExpression);
-            lastExpression.addRight(expression);
+            while (!operatorStack.isEmpty()) {
+                pushToOutput(operatorStack.pop());
+            }
+
+            return numberStack.pop();
         }
-        stack.push(expression);
-        currentIndex.incrementAndGet();
+
+        private void readNext() {
+            while (Objects.equals(current, ' ')) {
+                next();
+            }
+            if (current == null) {
+                return;
+            }
+            if (Character.isDigit(current)) {
+                parseNumber();
+                return;
+            } else if (current == '(') {
+                operatorStack.push(current);
+            } else if (current == ')') {
+                char operatorChar;
+
+                while ((operatorChar = operatorStack.pop()) != '(') {
+                    pushToOutput(operatorChar);
+                }
+            } else {
+                parseOperator();
+            }
+            next();
+        }
+
+        private void parseNumber() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(current);
+
+            Character next;
+            while ((next = next()) != null && Character.isDigit(next)) {
+                sb.append(current);
+            }
+
+            String s = sb.toString();
+            long value = Long.parseLong(s);
+            numberStack.push(value);
+        }
+
+        private void parseOperator() {
+            int operatorPrecedence = operatorMap.get(current).getPrecedence();
+            int topOperatorPrecedence;
+
+            while (!operatorStack.isEmpty()) {
+                char top = operatorStack.getFirst();
+                if (top == '(') {
+                    break;
+                }
+                topOperatorPrecedence = operatorMap.get(top).getPrecedence();
+                if (operatorPrecedence > topOperatorPrecedence) {
+                    break;
+                }
+                pushToOutput(operatorStack.pop());
+            }
+
+            operatorStack.push(current);
+        }
+
+        private void pushToOutput(char operatorChar) {
+            Operator operator = operatorMap.get(operatorChar);
+            long right = numberStack.pop();
+            long left = numberStack.pop();
+            long result = operator.apply(left, right);
+
+            numberStack.push(result);
+        }
+
+        private Character next() {
+            if (nextIndex < toParse.length()) {
+                return current = toParse.charAt(nextIndex++);
+            }
+            return current = null;
+        }
     }
 }
